@@ -91,17 +91,23 @@ initialize();
 function get_bounding(str)
 {
   hidden_span = document.createElement('span');
-  hidden_span.style.visibility="hidden";
+  // hidden_span.style.visibility="hidden";
   // add an invisible div just before the last element of the document
-  document.getElementById("page").appendChild(hidden_span);
+  var my_page = document.getElementById("page");
+  my_page.appendChild(hidden_span);
   // place the text in it
   hidden_span.innerHTML = str;
+  hidden_span.setAttribute('id',"nuke_me");
   // now read the elements width and height
+  var w = hidden_span.offsetWidth;
+  var h = hidden_span.offsetTop; // ?? this is not the height
+  var nuke_me = document.getElementById("nuke_me");
+  my_page.removeChild(nuke_me);
   
   // return it
   return {
-    width: hidden_span.offsetWidth,
-    height: hidden_span.offsetTop
+    width: w,
+    height: h
   };
 }
 
@@ -256,9 +262,11 @@ function double_up(unique, line_one, line_two)
       s += textual_up_identical(unique, k, one);
     } else {
       var bounds_one = get_bounding(one);
-      // console.log(bounds_one);
+      console.log(one);
+      console.log(bounds_one);
       var bounds_two = get_bounding(two);
-      // console.log(bounds_two);
+      console.log(two);
+      console.log(bounds_two);
       if (bounds_one.width > bounds_two.width) {
         two = pad_and_position(two, bounds_one.width, bounds_two.width);
         s += textual_up_diff(unique, k, one, two, true);
@@ -329,9 +337,9 @@ function toss()
   return !! Math.floor(Math.random() * 2);
 }
 
-function poemify(title, poem)
+function poemify(title, poem, the_el)
 {
-  var elem = document.getElementById("dynamic_element");
+  var elem = document.getElementById(the_el);
 
   //elem.innerHTML += '<u>'+double_up(one, two)+'</u>';
   journey = new Array(poem.one.length + 1);
@@ -371,8 +379,9 @@ function click_this()
   
   var title = this_title();
   var poem = this_poem();
+  var the_el = "dynamic_element";
 
-  poemify(title, poem);
+  poemify(title, poem, the_el);
 }
 
 function that_title()
@@ -395,8 +404,9 @@ function click_that()
 {
   var title = that_title();
   var poem = that_poem();
+  var the_el = "dynamic_element";
 
-  poemify(title, poem);
+  poemify(title, poem, the_el);
 }
 
 /*
@@ -462,8 +472,9 @@ function click_the_other()
 {
   var title = (toss() ? this_title() : that_title());
   var poem = the_other_poem();
+  var the_el = "dynamic_element";
 
-  poemify(title, poem);
+  poemify(title, poem, the_el);
 }
 
   </script>
@@ -496,7 +507,8 @@ function click_the_other()
       <script type="text/javascript">
       
         var divil = '';
-        divil += '<div id="dynamic_element"></div>\n';
+        var the_el = "dynamic_element";
+        divil += '<div id="' + the_el + '"></div>\n';
         document.write(divil);
         
         click_this();
