@@ -91,7 +91,7 @@ initialize();
 function get_bounding(str)
 {
   hidden_span = document.createElement('span');
-  // hidden_span.style.visibility="hidden";
+  hidden_span.style.visibility="hidden";
   // add an invisible div just before the last element of the document
   var my_page = document.getElementById("page");
   my_page.appendChild(hidden_span);
@@ -279,7 +279,7 @@ function double_up(unique, line_one, line_two)
       }
     }
   }
-  s += '<br><br><br>\n';
+  s += '<br>\n';
   
   return s;
 }
