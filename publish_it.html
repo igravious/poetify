@@ -1,4 +1,4 @@
-<form action="publish_it.rb" method="get">
+<form action="publish_it.cgi" method="post">
 
 <table id="left_and_right" class="tabular" border="2" cellspacing="0" cellpadding="7"> 
 <tr>
@@ -7,14 +7,14 @@
 </tr>
 <tr> 
 <td>
-	<textarea id="left" rows="16" cols="80">
+	<textarea id="left" name="left" rows="16" cols="80">
 
 	Verse
 
 	</textarea>
 </td> 
 <td>
-	<textarea id=right" rows="16" cols="80">
+	<textarea id="right" name="right" rows="16" cols="80">
 
 	re:Verse
 
@@ -23,7 +23,7 @@
 </tr> 
 </table>
 
-the title of your poem: <input type="text" name="" value id="" class="" />
-<input id="" class="" name="" type="submit" value="Publish Me!"/>
+the title of your poem: <input type="text" name="title" id="title" class="" />
+<input id="" class="" name="Publish" type="submit" value="Publish Me!"/>
 
 </form>
