@@ -1,0 +1,14 @@
+
+form.classy {
+	background-color: #eeeeee;
+	/* text-shadow: 5px 5px 0px silver; */
+}
+
+legend.classy {
+	text-shadow: 3px 3px 0px silver;
+	font-size: larger;
+	font-style: italic;
+	color: olive;
+	font-family: Georgia;
+	letter-spacing: 3px
+}
