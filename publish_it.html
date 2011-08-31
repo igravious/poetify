@@ -1,4 +1,4 @@
-<form action="publish_it.cgi" method="post">
+<form action="zpoet/publish" method="post"> <!-- zpoet is a dumb name, come up with a decent name that does not start with p -->
 
 <table id="left_and_right" class="tabular" border="2" cellspacing="0" cellpadding="7"> 
 <tr>
@@ -7,14 +7,14 @@
 </tr>
 <tr> 
 <td>
-	<textarea id="left" name="left" rows="16" cols="80">
+	<textarea id="left" name="poem0" rows="16" cols="80">
 
 	Verse
 
 	</textarea>
 </td> 
 <td>
-	<textarea id="right" name="right" rows="16" cols="80">
+	<textarea id="right" name="poem1" rows="16" cols="80">
 
 	re:Verse
 
@@ -22,10 +22,13 @@
 </td> 
 </tr> 
 </table>
-
-The title of your ePoem: <input type="text" name="title" id="ePoem_title" class="" />
-The name of your ePage: <input type="text" name="title" id="ePage_name" class="" />
+<br>
+The title of your ePoem: <input type="text" name="ePoem_title" id="ePoem_title" class="" /> (or leave blank if untitled)
+<br>
+The name of your ePage: <input type="text" name="ePage_name" id="ePage_name" class="" />
+<br>
 <input id="" class="" name="Publish" type="submit" value="Publish Me!"/>
 
+<input id="" class="" name"ePoem_type" type="hidden" value="2:verse"/>
 
 </form>
