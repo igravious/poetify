@@ -1,10 +1,14 @@
+
+$:.unshift(env['DOCUMENT_ROOT']+"/vendor_ruby")
+$:.unshift(env['DOCUMENT_ROOT']+"/vendor_ruby/1.8")
+
+require 'poetify'
+
 require 'rubygems'
 require 'camping'
 
 ### Begin Camping application ###
 Camping.goes :Poetify
-
-require 'poetify'
 
 module Poetify::Models
   # class Post < Base; end
