@@ -4,8 +4,7 @@ require 'camping'
 ### Begin Camping application ###
 Camping.goes :Poetify
 
-require 'epoem'
-require 'form_post'
+require 'poetify'
 
 module Poetify::Models
   # class Post < Base; end
@@ -25,7 +24,9 @@ module Poetify::Controllers
       # first use a generic parameter unpacker
       # must be a hash with at least {ePoem_type => "", ePoem_title => "", ePage_name => "", poem[0 .. n-1] => "", ePoem_effect = ""}
       # @e_poem is available to the view
-      @e_poem = Poetify::unpack_params @request.params      
+      # @e_poem = Poetify::unpack_params @request.params
+      # @e_poem.electronic_binding
+      
       render :publish
     end
   end
@@ -58,6 +59,15 @@ module Poetify::Views
   end
   
   def publish
+  	# publishing slip, wrap in a form
+  	form.published "poem published" do
+  		div.stylish "Poet ()"
+  		div.stylish "Date ()"
+  		div.stylish "Copyright ()"
+  		div.stylish "Link to work ()"
+  		div
+  		div.stylish "<= undo, go back"
+  	end
   end
   
   def hello
