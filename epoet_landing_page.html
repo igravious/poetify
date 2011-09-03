@@ -11,19 +11,26 @@
 </head>
 
 <body>
-	<div style="width:800px"> <!-- adjust as necessary -->
-  		
-  		<div></div>
+	<div id="center_it" style="width:800px;"> <!-- adjust as necessary -->
+	<script>
+$(function() {
+ // Handler for .ready() called.
+ the_top = $("#center_it").offset().top;
+ the_left = (($(window).width() - 800)/2);
+ // alert(the_top + " --- " + the_left);
+ $("#center_it").offset({ top: the_top, left: the_left });
+});
+</script>
   
-		<form class="classy" style="float:left;">
+		<form id="resize_me_form" class="classy" style="float:left; ">
 		<fieldset> <legend class="classy">Welcome</legend>
-			<div> Hello intrepid explorer </div>
+			<div id="resize_me"> Hello intrepid explorer </div>
 		</fieldset>
 		</form>
 	
-		<form class="classy" style="float:right;">
+		<form id="epages_form" class="classy" style="float:right;">
 		<fieldset> <legend class="classy">ePages</legend>
-			<div> Dynamically read ePages using cgi/get_epages.cgi</div>
+			<div id="epages"></div>
 		</fieldset>
 		</form>
   
@@ -47,6 +54,17 @@ $("#description").load("cgi/red_or_dead.cgi?render=/var/www/localhost/htdocs/REA
     var msg = "Sorry, but I couldn't load the README";
     // $("#description").html(msg + xhr.status + " " + xhr.statusText);
     $("#description").html(msg);
+  }
+});
+$("#epages").load("cgi/get_epages.cgi", function(response, status, xhr) {
+  if (status == "error") {
+    var msg = "Sorry, but I couldn't load the ePages";
+    // $("#epages").html(msg + xhr.status + " " + xhr.statusText);
+    $("#epages").html(msg);
+  } else {
+  	// alert();
+  	$("#resize_me").css( "width", (740 - $("#epages_form").width()) );
+	$("#resize_me").css( "height", ($("#epages_form").height() - 26) );
   }
 });
 </script>

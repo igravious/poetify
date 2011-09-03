@@ -9,6 +9,8 @@
 #new_object = "NewObject"
 #new_page = "New Page!"
 #new_folder = "New Folder!"
+
+# remove superfluous stuff, share code with standalone
  
 print <<-PREAMBLE
 Content-type: text/html
@@ -195,9 +197,9 @@ begin
 
 	require 'cgi'
 	cgi = CGI.new
-	puts "<h2>ePages #{cgi.request_method}</h2>"
 	
-	puts '<div style="width: 300px; padding: 20px; border: 1px solid #808080">'
+	#puts "<h2>ePages #{cgi.request_method}</h2>"
+	#puts '<div style="width: 300px; padding: 20px; border: 1px solid #808080">'
 	
 	@db = SQLite3::Database.new( "poetify.db" )
 	
