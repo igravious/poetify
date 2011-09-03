@@ -15,8 +15,6 @@ module Poetify
 		}
 	
 	# POEM_TYPES = { :'1:verse' => :SingularPoem, :'2:verse' => :TwoVersePoem, :'n:verse' => :NVersePoem, :'woven:verse' => :WovenVersePoem }
-
-	require 
 	
 	def unpack_params(params)
 		begin
@@ -24,7 +22,7 @@ module Poetify
 			poem_type = params['ePoem_type']
 			
 			require POEM_TYPES[poem_type]
-			e_poem = 
+ 
 		rescue Exception => bang
 			$stderr.write "Error loading poem type #{poem_type} :: I went #{bang.to_str}"
 		end

@@ -1,8 +1,12 @@
 
-$:.unshift(env['DOCUMENT_ROOT']+"/vendor_ruby")
-$:.unshift(env['DOCUMENT_ROOT']+"/vendor_ruby/1.8")
+# you could put ruby files that both CGI and Rack Apps need
+# in a place relative to the Web Server root or in a gema
 
-require 'poetify'
+# def required_reading env
+#   $:.unshift( File.join(env['DOCUMENT_ROOT'],"vendor_ruby") )
+#   $:.unshift( File.join(env['DOCUMENT_ROOT'],"vendor_ruby","1.8") )
+#   require 'poetify'
+# end
 
 require 'rubygems'
 require 'camping'
@@ -10,12 +14,52 @@ require 'camping'
 ### Begin Camping application ###
 Camping.goes :Poetify
 
+# def create
+#   $stderr.puts "am i here?"
+# end
+
+module Poetify
+
+  def self.common_files root
+    path = File.join(root,"vendor_ruby")
+    $:.unshift(path) if !$:.include?(path)
+    path = File.join(root,"vendor_ruby","1.8")
+    $:.unshift(path) if !$:.include?(path)
+    require 'poetify'
+  end
+
+  # use sys logger
+  
+  @loaded = false # um, should this be self. or @@ :(
+  def self.required_reading
+    $stderr.puts "or how about now?"
+    if !@loaded
+      $stderr.puts "loading for your convenience"
+      # root = env['DOCUMENT_ROOT']
+      # required_reading
+      # $stderr.puts ENV['PWD']
+      self.common_files '/var/www/localhost/htdocs'
+    else
+      $stderr.puts "already loaded bud"
+    end
+  end
+  
+  def self.create
+    self.required_reading
+  end
+  
+  def self.new # just for class, not for Module?
+  end
+
+end
+
 module Poetify::Models
   # class Post < Base; end
 end
 
 module Poetify::Controllers
   
+  # /zpoet
   class Index
     def get
       # @posts = Post.all
@@ -23,6 +67,7 @@ module Poetify::Controllers
     end
   end
   
+  # /zpoet/publish
   class Publish
     def post
       # first use a generic parameter unpacker
@@ -83,13 +128,37 @@ module Poetify::Views
     h1 "$: path"
     $:.each do |path|
       # h1 post.title
-      # div.stylish { post.body }
-      div.stylish { path }
+      # div.stylish (post.body)
+      div.stylish(path)
     end
     h1 "current working dir"
     div.stylish Dir.getwd
+    h1 "ENV variables"
+    env.each do |e_var|
+      # h1 post.title
+      # div.stylish (post.body)
+      div.stylish("#{e_var}")
+    end
+
   end
   
 end
 
-run Poetify
+# this does nothing in Camping server/console, just needed for pure Rack Apps?
+case ENV['RACK_ENV']
+  when 'development'
+    $stderr.puts "i'm in dev mode"
+  when 'production'
+    $stderr.puts "i'm in live mode"
+    run Poetify
+  else
+    raise 'unknown rack environment'
+end
+
+if __FILE__ == $0
+  # this library may be run as a standalone script
+  # as in -> ruby rack_apps/zpoet/config.ru
+  # dunno why you'd want to do that but anyway
+  # yay
+  $stderr.puts "Hi there"
+end
