@@ -39,3 +39,39 @@ end
 
 require File.here "poetify/epoem"
 require File.here "poetify/form_post"
+	
+class EPage < ActiveRecord::Base
+	serialize :body
+	set_table_name "ePages"
+end
+
+class KindConstant < ActiveRecord::Base
+	set_table_name "KindConstants"
+end
+
+class EPoem
+
+	# set the correct Module to autoload
+	def self.autoload
+		# db connection has been made by now presumably
+		KindConstant.all.each do |kind_const|
+			#$stderr.puts "the kind_const is #{kind_const}"
+			the_module_sym = kind_const.klass_name
+			#$stderr.puts "the sym is #{the_module_sym}"
+			the_file = File.join('poetify',kind_const.klass_name.downcase)
+			#$stderr.puts "the file is #{the_file}"
+			Kernel.autoload the_module_sym, the_file
+		end
+	end
+	
+	# and give the desired Module to whoever wants it
+	def self.type the_type # klass_name should be called const_name
+		#$stderr.puts "the type is #{the_type}"
+		kindly = KindConstant.find(the_type)
+		#$stderr.puts "the kindly is #{kindly}"
+		const_get(kindly.klass_name)
+	end
+
+end
+
+EPoem.autoload
