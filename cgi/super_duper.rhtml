@@ -1,0 +1,25 @@
+<div style='border: 1px solid #808080; background:white; position: absolute; display: none;' id='file-folder'>
+<!-- menu stuff in here, only when you hover over the file or folder should the menu down arrow appear -->
+<!-- pressing ESC should make it disappear -->
+<br>
+<form name='superFolder' action='<%= $GET_EPAGES %>' method='post'>
+<input id='' class='' name='<%= NEW_OBJECT %>' type='text' value=''/>
+<input id='' class='' name='<%= PARENT_ID %>' type='hidden' value=''/>
+<!-- check for non-null string before clicking -->
+<input id='' class='' name='Submit' type='submit' value='<%= NEW_FOLDER %>'/>
+</form>
+<br>
+<form name='superPage' action='<%= $GET_EPAGES %>' method='post'>
+<input id='' class='' name='<%= NEW_OBJECT %>' type='text' value=''/>
+<input id='' class='' name='<%= PARENT_ID %>' type='hidden' value=''/>
+<!-- check for non-null string before clicking -->
+<input id='' class='' name='Submit' type='submit' value='<%= NEW_PAGE %>'/>
+<select name='<%= NEW_KIND %>'>
+<option value="1:verse">Singular-Verse</option>
+<option value="2:verse">Re-Verse</option>
+<option value="n:verse">Multi-Verse</option>
+<option value="woven:verse">Woven-Verse</option>
+</select>
+</form>
+Cool Menu Stuff: <span id='custom-stuff'></span>
+</div>

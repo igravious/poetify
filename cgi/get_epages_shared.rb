@@ -1,49 +1,14 @@
-#!/usr/bin/env ruby
-# get_epages.cgi
 
-# ruby sqlite3 - it's all here - _all_ here
-# http://sqlite-ruby.rubyforge.org/sqlite3/faq.html
-
-# UGLY, IMPERFECT -- BUT FUNCTIONAL
-
-#new_object = "NewObject"
-#new_page = "New Page!"
-#new_folder = "New Folder!"
-
-# remove superfluous stuff, share code with standalone
- 
-print <<-PREAMBLE
-Content-type: text/html
-
-<script type='text/javascript' src='https://www.google.com/jsapi?key=ABQIAAAAUzJ_6UqPfuuygp9Xo0AGoxRYjYHH-N6Ytftz1YKT8IaSgMm3fBSIC090wMAgB4Mcecyj6FsiJdo98g' > </script>
-<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js'> </script>
-<script src='/js/file-folder-utilities-0.1.js'> </script>
-<div style='border: 1px solid #808080; background:white; position: absolute; display: none;' id='file-folder'>
-<!-- menu stuff in here, only when you hover over the file or folder should the menu down arrow appear -->
-<!-- pressing ESC should make it disappear -->
-<br>
-<form name='superFolder' action='get_epages.cgi' method='post'>
-<input id='' class='' name='NewObject' type='text' value=''/>
-<input id='' class='' name='EpageID' type='hidden' value=''/>
-<!-- check for non-null string before clicking -->
-<input id='' class='' name='Submit' type='submit' value='New Folder!'/>
-</form>
-<br>
-<form name='superPage' action='get_epages.cgi' method='post'>'
-<input id='' class='' name='NewObject' type='text' value=''/>
-<input id='' class='' name='EpageID' type='hidden' value=''/>
-<!-- check for non-null string before clicking -->
-<input id='' class='' name='Submit' type='submit' value='New Page!'/>
-<select name='EpageTYPE'>
-<option value="1:verse">Singular-Verse</option>
-<option value="2:verse">Re-Verse</option>
-<option value="n:verse">Multi-Verse</option>
-<option value="woven:verse">Woven-Verse</option>
-</select>
-</form>
-Cool Menu Stuff <span id='custom-stuff'></span>
-</div>
-PREAMBLE
+puts "<script src='/js/file-folder-utilities-0.1.js'> </script>" # should make .rjs (NewObject, EpageID)
+require 'erb'
+file_folder = ERB.new(File.read('super_duper.rhtml'))
+NEW_OBJECT = "NewObject"
+NEW_PAGE = "New Page!"
+NEW_FOLDER = "New Folder!"
+PARENT_ID = "EpageID"
+NEW_KIND = "EpageTYPE"
+html_str = file_folder.result(binding)
+puts html_str
 
 begin
 
@@ -85,9 +50,9 @@ begin
 				else
 					case kind
 						when 1
-							puts "<li> ePage :: <a href='/work_on_singular.html?id=#{epage_id}&name=#{label}'>#{label}</a> </li>"
+							puts "<li> ePage :: <a href='/cgi/test_work_on_singular.cgi?id=#{epage_id}&name=#{label}'>#{label}</a> </li>"
 						when 2
-							puts "<li> ePage :: <a href='/work_on_reverse.html?id=#{epage_id}&name=#{label}'>#{label}</a> </li>"
+							puts "<li> ePage :: <a href='/cgi/test_work_on_reverse.cgi?id=#{epage_id}&name=#{label}'>#{label}</a> </li>"
 						when 3
 							puts "<li> ePage :: <a href='/work_on_multiverse.html?id=#{epage_id}&name=#{label}'>#{label}</a> </li>"
 						when 4
@@ -98,15 +63,20 @@ begin
 		rescue => boom
 			puts "<div>urk 1</div>"
 			pre boom
-			pre boom.backtrace
+			trace = boom.backtrace
+			pre_s trace.join("\n")
 			puts "<div>i said urk</div>"
 		end
 	end
 	
 	def pre obj
-		puts "<pre class='ruby_output'>#{CGI.escapeHTML(obj.inspect)}</pre>"
+			puts "<pre class='ruby_output'>#{CGI.escapeHTML(obj.inspect)}</pre>"
 	end
 	
+	def pre_s str
+			puts "<pre class='ruby_output'>#{CGI.escapeHTML(str)}</pre>"
+	end
+		
 	def folder_kind
 		nil
 	end
@@ -140,7 +110,8 @@ begin
 		rescue => boom
 			puts "<div>urk 3</div>"
 			pre boom
-			pre boom.backtrace
+			trace = boom.backtrace
+			pre_s trace.join("\n")
 			puts "<div>i said urk</div>"
 		end
 	end
@@ -160,9 +131,9 @@ begin
 	
 	def create_epage( the_page, parent_id, the_kind )
 		#puts "<div>the label is #{the_page}</div>"
-		puts "<div>the kind is #{the_kind}</div>"
+		#puts "<div>the kind is #{the_kind}</div>"
 		the_kind = POEM_TYPES[the_kind.to_sym]
-		puts "<div>the kind really is #{the_kind}</div>"
+		#puts "<div>the kind really is #{the_kind}</div>"
 
 		# label must not be nil and must be unique
 		
@@ -190,7 +161,8 @@ begin
 		rescue => boom
 			puts "<div>urk 2</div>"
 			pre boom
-			pre boom.backtrace
+			trace = boom.backtrace
+			pre_s trace.join("\n")
 			puts "<div>i said urk</div>"
 		end
 	end
@@ -198,47 +170,40 @@ begin
 	require 'cgi'
 	cgi = CGI.new
 	
-	#puts "<h2>ePages #{cgi.request_method}</h2>"
-	#puts '<div style="width: 300px; padding: 20px; border: 1px solid #808080">'
+	if $STANDALONE # should yield
+		puts "<h2>ePages #{cgi.request_method}</h2>"
+		puts '<div style="width: 300px; padding: 20px; border: 1px solid #808080">'
+	end
 	
-	@db = SQLite3::Database.new( "poetify.db" )
+	require 'yaml'
+	# should be a symlink to the config file
+	yml = YAML::load_file('.poetifyrc')
+
+	#require 'rubygems'
+	#require 'active_record'
+	#ActiveRecord::Base.establish_connection(yml['locations']['database_connection'])
+	@db = SQLite3::Database.new( yml['locations']['database_connection']['database'] )
 	
 	params = cgi.params
+	#p ENV
 	#p params
 	# these should be CONSTANTS and used in the HERE DOC as well
-	new_object = "NewObject"
-	new_page = "New Page!"
-	new_folder = "New Folder!"
-	parent_id = "EpageID"
-	new_kind = "EpageTYPE"
 	
 	if cgi.request_method == "POST"
 		# create new ePage or create new folder ?
-		if params["Submit"].first == new_page
-			create_epage( params[new_object].first, params[parent_id].first, params[new_kind].first )
+		if params["Submit"].first == NEW_PAGE
+			create_epage( params[NEW_OBJECT].first, params[PARENT_ID].first, params[NEW_KIND].first )
 		else
-			create_folder( params[new_object].first, params[parent_id].first )
+			create_folder( params[NEW_OBJECT].first, params[PARENT_ID].first )
 		end
 	else
 	end
 	
-	#puts '<br>'
-	#puts '<form action="get_epages.cgi" method="post">'
-	#puts '<input id="" class="" name="' +new_object+ '" type="text" value=""/>'
-	#puts '<input id="" class="" name="Submit" type="submit" value="' +new_folder+ '"/>'
-	#puts '</form>'
-
 	puts '<ul class="tree">'
 	paint_tree nil
 	puts '</ul>'
 	
-	#puts '<br>'
-	#puts '<form action="get_epages.cgi" method="post">'
-	#puts '<input id="" class="" name="' +new_object+ '" type="text" value=""/>'
-	#puts '<input id="" class="" name="Submit" type="submit" value="' +new_page+ '"/>'
-	#puts '</form>'
-	
-	puts '</div>' 
+	puts '</div>' if $STANDALONE # should yield
 	
 rescue => bang
 	puts "Error running script: " + bang + "<br>"
