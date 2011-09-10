@@ -1,8 +1,4 @@
-
-Poetify
-====
-
-I said, Poetify
+Poetify - I said, Poetify
 -----------
 
 Poetify is an open-source electronic poetry publishing platform.
@@ -47,20 +43,11 @@ http://web.durity.com:8080/publish_it.html
 
 ### Types or forms of poems. 
 
-1) singular
-
-2) re:verse
-
-3) n:verse
++ non-ergodic (sub-)forms
+ * singular
+ * re:verse
+ * n:verse
+ * trace:verse
++ ergodic forms, aesthetic of frustration
 
 ###
-
-This is a regular paragraph.
-
-<table>
-    <tr>
-        <td>Foo</td>
-    </tr>
-</table>
-
-This is another regular paragraph.
