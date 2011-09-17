@@ -17,6 +17,9 @@ Content-type: text/html
 </head>
 
 <body>
+	<div>
+	<a href="http://web.durity.com:8080/cgi/epoet_landing_page.cgi" style="font-size:400%; font-family:'times new roman',times,georgia,serif; padding:0.5em 0.2em; float:left; margin-left:0; margin-right:-50; margin-top:-50;">¶</a>
+	</div>
 	<div id="center_it" style="width:800px;"> <!-- adjust as necessary -->
 	<script>
 	$(function() {
@@ -31,8 +34,10 @@ Content-type: text/html
 		<form id="resize_me_form" class="classy" style="float:left; ">
 		<fieldset> <legend class="classy">Welcome</legend>
 			<div id="resize_me">
-			Hello intrepid explorer. This is version 0.1.5 of Poetify and it is for demonstration
-			purposes only - to give you a flavour of the functionality.
+			Welcome o seeker of rare pleasures. This is version 0.1.5 work-in-progress of
+			Poetify and it is for demonstration purposes only - to give you a flavour of
+			the functionality. This has been checked over in Chrome and Firefox - Internet
+			Explorer probably does not work yet, awfully sorry about that.
 			</div>
 		</fieldset>
 		</form>
@@ -55,7 +60,7 @@ Content-type: text/html
   		</fieldset>
   		</form>
 	
-	</div>
+	</span>
   
 <script>
   $("#description").load("/cgi/red_or_dead.cgi?render=/var/www/localhost/htdocs/README.markdown", function(response, status, jqxhr) {
@@ -83,8 +88,8 @@ if cgi.request_method.downcase == 'post'
     // Assign handlers immediately after making the request,
     // and remember the jqxhr object for this request
     $("#epages").html(response_data);
-    $("#resize_me").css( "width", (740 - $("#epages_form").width()) );
-    $("#resize_me").css( "height", ($("#epages_form").height() - 26) );
+    $("#resize_me").css( "width", (750 - $("#epages_form").width()) );
+    $("#resize_me").css( "height", ($("#epages_form").height() - 40) );
     window.location = '/cgi/epoet_landing_page.cgi'
   })
   .success(function() { /* alert("second success"); */ })
@@ -109,8 +114,8 @@ else
       /* $("#epages").html(msg); */
     } else {
   	  /* alert('yippee'); */
-  	  $("#resize_me").css( "width", (740 - $("#epages_form").width()) );
-	  $("#resize_me").css( "height", ($("#epages_form").height() - 26) );
+  	  $("#resize_me").css( "width", (750 - $("#epages_form").width()) );
+	  $("#resize_me").css( "height", ($("#epages_form").height() - 40) );
     }
   }
   $("#epages").load("/cgi/get_epages_embedded.cgi", epages_fn);
