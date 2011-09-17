@@ -6,8 +6,8 @@
 begin
 
 	def test_dynamic_load
-		p_type = 2
-		e_poem_module = EPoem.type(p_type)
+		the_type = 2
+		e_poem_module = EPoem.type(the_type)
 		$stderr.puts e_poem_module.send('hello')
 		$stderr.puts e_poem_module::hello
 		$stderr.puts e_poem_module.hello
