@@ -41,7 +41,7 @@ The name of your ePage is <span id='old_ePage_name'>_____</span> or enter a new 
 <input id="" class="" name="Try" type="submit" value="Try Me!"/>&nbsp;
 <input id="" class="" name="Publish" type="submit" value="Publish Me!"/>
 
-<input id="" class="" name"ePoem_type" type="hidden" value="woven:verse"/>
+<input id="" class="" name="ePoem_type" type="hidden" value="4"/> <!-- Traceverse -->
 </fieldset>
 </form>
 
@@ -66,6 +66,6 @@ $.extend({
 
 $(function() {
  // Handler for .ready() is called
- $('#old_ePage_name').empty().append($.getUrlVar('name')).css('color', 'green');
+ $('#old_ePage_name').empty().append(unescape($.getUrlVar('name'))).css('color', 'green');
 });
 </script>
