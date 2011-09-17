@@ -1,12 +1,13 @@
 <html>
-<head lang="it">
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  
+<head lang="it"> <!-- poem is in what language? detect? ask? -->
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
   <script type="text/javascript" src="https://www.google.com/jsapi?key=ABQIAAAAUzJ_6UqPfuuygp9Xo0AGoxRYjYHH-N6Ytftz1YKT8IaSgMm3fBSIC090wMAgB4Mcecyj6FsiJdo98g"></script>
-  
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+  <link type="text/css" rel="stylesheet" media="screen" href="<%= http_host %>/css/poetify.css" />
   
   <script type="text/javascript">
+  
+  <!-- user-defined background -->
 
 function verse_poem()
 {
@@ -33,7 +34,7 @@ this_figure.title = "<%= title %>";
 // poem
 this_figure.poem = verse_poem();
 
-that_figure.title = '';
+that_figure.title = '<%= title %>'; /* this would appear to be wrong */
 that_figure.poem = reverse_poem();
 
 function reverse(in_str)
@@ -456,42 +457,58 @@ function click_the_other()
   </script>
 </head>
 <body>
-  <div id="page">
-    
-    <div id="this_side">
-      <div id_"style_chooser">
-        <a href="#" onclick="click_this()">&Alpha;</a>
-      </div>
-    </div>
-    <br> <!-- crappy separator for now -->
-    
-    <div id="that_side">
-      <div id_"style_chooser">
-        <a href="#" onclick="click_that()">&Omega;</a>
-      </div>
-    </div>
-    <br> <!-- crappy separator for now -->
-    
-    <div id="the_other_side">
-      <div id_"style_chooser">
-        <a href="#" onclick="click_the_other()">~</a>
-      </div>
-    </div>
-    <br>
-    
-    <div id="double_figure">
-      <script type="text/javascript">
-      
-        var divil = '';
-        var the_el = "dynamic_element";
-        divil += '<div id="' + the_el + '"></div>\n';
-        document.write(divil);
-        
-        click_this();
-      
-      </script>
-    </div>
+  <div id="center_it" style="width:800px;"> <!-- adjust as necessary -->
+	<script>
+	$(function() {
+		// Handler for .ready() called.
+		the_top = $("#center_it").offset().top;
+ 		the_left = (($(window).width() - 800)/2);
+ 		// alert(the_top + " --- " + the_left);
+ 		$("#center_it").offset({ top: the_top, left: the_left });
+	});
+	</script>
 
+	<form name='formly' class='classy'>
+	<fieldset> <legend class="classy">Re:Verse</legend>
+	  <div id="page">
+		
+		<div id="this_side">
+		  <div id_"style_chooser">
+			<a href="#" onclick="click_this()">&Alpha;</a>
+		  </div>
+		</div>
+		<br> <!-- crappy separator for now -->
+		
+		<div id="that_side">
+		  <div id_"style_chooser">
+			<a href="#" onclick="click_that()">&Omega;</a>
+		  </div>
+		</div>
+		<br> <!-- crappy separator for now -->
+		
+		<div id="the_other_side">
+		  <div id_"style_chooser">
+			<a href="#" onclick="click_the_other()">~</a>
+		  </div>
+		</div>
+		<br>
+		
+		<div id="double_figure">
+		  <script type="text/javascript">
+		  
+			var divil = '';
+			var the_el = "dynamic_element";
+			divil += '<div id="' + the_el + '"></div>\n';
+			document.write(divil);
+			
+			click_this();
+		  
+		  </script>
+		</div>
+		<a style="float:right" href='<%= http_host %>/cgi/epoet_landing_page.cgi'>back ito the landing page</a>	
+	  </div>
+	</fieldset>
+	</form>
   </div>
 </body>
 </html>
