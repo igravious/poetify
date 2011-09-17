@@ -45,7 +45,9 @@
 							event.stopPropagation();
 						});
 					} else {
-						$li.addClass("Nodeless");
+						$li.addClass("Nodeless").click(function(event) {
+							event.stopPropagation();
+						});
 					}
 					
 			} else {
