@@ -1,5 +1,7 @@
 
 puts "<script src='/js/file-folder-utilities-0.1.js'> </script>" # should make .rjs (NewObject, EpageID)
+puts '<link rel="stylesheet" href="/css/jquery-simpleTreeMenu-1.2.0.css" />'
+
 require 'erb'
 file_folder = ERB.new(File.read('super_duper.rhtml'))
 NEW_OBJECT = "NewObject"
@@ -20,7 +22,7 @@ begin
 		begin
 			if node == nil
 				where_clause = "WHERE t.parent_id IS NULL"
-				puts "<div><img id='the-image' src='/images/down-arrow.png'></div>"
+				puts "<span><i>All&nbsp;pages&nbsp;and&nbsp;folders</i>&nbsp;<img id='the-image' onmouseover='this.style.cursor=\"hand\"; this.src=\"/images/down-arrow-hover.png\"' onmouseout='this.style.cursor=\"auto\"; this.src=\"/images/down-arrow.png\"' style='float:right; display:inline; margin-top: 8px' src='/images/down-arrow.png'></span><hr>"
 				puts "<script>$('#the-image').toggle(superMenuIn, superMenuOut);</script>"
 			else
 				where_clause = "WHERE t.parent_id = #{node}"
@@ -37,11 +39,12 @@ begin
 			rows.each do |row|
 				epage_id = row[col_epage_id]
 				kind = row[col_kind]
-				label = row[col_label]
+				label = row[col_label].gsub(/ /,"&nbsp;")
+				s_label = row[col_label]
 				if kind == folder_kind
 					# recurse
 					puts "<li>"
-					puts "<span> Folder :: #{label} <img id='the-image-#{epage_id}' src='/images/down-arrow.png'></span>"
+					puts "<span class='igor'>&nbsp;Folder&nbsp;::&nbsp;<i>#{label}</i>&nbsp;<img id='the-image-#{epage_id}' onmouseover='this.style.cursor=\"hand\"; this.src=\"/images/down-arrow-hover.png\"' onmouseout='this.style.cursor=\"auto\"; this.src=\"/images/down-arrow.png\"' style='float:right; display:none; margin-top: 8px' src='/images/down-arrow.png'></span>"
 					puts "<script>$('#the-image-#{epage_id}').toggle(superMenuIn, superMenuOut);</script>"
 					puts "<ul>"
 					paint_tree epage_id
@@ -50,13 +53,13 @@ begin
 				else
 					case kind
 						when 1
-							puts "<li> ePage :: <a href='/cgi/test_work_on_singular.cgi?id=#{epage_id}&name=#{label}'>#{label}</a> </li>"
+							puts "<li>&nbsp;ePage&nbsp;::&nbsp;<a style='display:inline;' href='/cgi/test_work_on_singular.cgi?id=#{epage_id}&name=#{s_label}'>#{label}</a></li>"
 						when 2
-							puts "<li> ePage :: <a href='/cgi/test_work_on_reverse.cgi?id=#{epage_id}&name=#{label}'>#{label}</a> </li>"
+							puts "<li>&nbsp;ePage&nbsp;::&nbsp;<a style='display:inline;' href='/cgi/test_work_on_reverse.cgi?id=#{epage_id}&name=#{s_label}'>#{label}</a></li>"
 						when 3
-							puts "<li> ePage :: <a href='/work_on_multiverse.html?id=#{epage_id}&name=#{label}'>#{label}</a> </li>"
+							puts "<li>&nbsp;ePage&nbsp;::&nbsp;<a style='display:inline;' href='/work_on_multiverse.html?id=#{epage_id}&name=#{s_label}'>#{label}</a></li>"
 						when 4
-							puts "<li> ePage :: <a href='/work_on_traceverse.html?id=#{epage_id}&name=#{label}'>#{label}</a> </li>"
+							puts "<li>&nbsp;ePage&nbsp;::&nbsp;<a style='display:inline;' href='/cgi/test_work_on_traceverse.cgi?id=#{epage_id}&name=#{s_label}'>#{label}</a></li>"
 					end
 				end
 			end
@@ -202,6 +205,30 @@ begin
 	puts '<ul class="tree">'
 	paint_tree nil
 	puts '</ul>'
+print <<-SCRIPT_BLOCK
+<script type="text/javascript" src="/js/3rd-party/jquery-simpleTreeMenu-1.2.0.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    $(".tree").simpleTreeMenu();
+    $(".igor").hover(
+      function () {
+        /*
+        var img_kid = $(this)[0].children[0].children[0];
+        img_kid.setAttribute("style", "float:right; display:inline; margin-top: 8px")
+        */
+        $($(this)[0].children[1]).show();
+      },
+      function () {
+        /*
+        var img_kid = $(this)[0].children[0].children[0];
+        img_kid.setAttribute("style", "float:right; display:none; margin-top: 8px")
+        */
+        $($(this)[0].children[1]).hide();
+      }
+    );
+  });
+</script>
+SCRIPT_BLOCK
 	
 	puts '</div>' if $STANDALONE # should yield
 	
