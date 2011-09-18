@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 # get_epages_standalone.cgi
 
+# version 0.1a dirty raine edition (dirty as in the code is a mess!)
+# next version is going to be cleaned up, refactored, tracified
+
 print <<-ORIGINAL_PAGE
 Content-type: text/html
 
