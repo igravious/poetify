@@ -18,7 +18,7 @@ Content-type: text/html
 
 <body>
 	<div>
-	<a href="http://web.durity.com:8080/cgi/epoet_landing_page.cgi" style="font-size:400%; font-family:'times new roman',times,georgia,serif; padding:0.5em 0.2em; float:left; margin-left:0; margin-right:-50; margin-top:-50;">¶</a>
+	<!-- a href="http://web.durity.com:8080/cgi/epoet_landing_page.cgi" style="position: relative; font-size:400%; font-family:'times new roman',times,georgia,serif; padding:0.5em 0.2em; float:left; margin-left:0; margin-right:0; margin-top:0; margin-bottom; z-index:5">¶</a -->
 	</div>
 	<div id="center_it" style="width:800px;"> <!-- adjust as necessary -->
 	<script>
