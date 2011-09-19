@@ -59,7 +59,13 @@ Content-type: text/html
 		
   		<form class="classy" style="clear:both">
   		<fieldset> <legend class="classy">Source, Copyright & Warranty</legend>
-			<div> Yada yada yada </div>
+			<div>
+                            <a href="https://github.com/igravious/poetify">Source Code at Github</a>
+                            <br>
+                            <i>Copyrighted 2011 by Anthony Durity using materials provided by Jyväskylä University under the <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPL version 3</a></i>
+                            <br>
+                            In contrast to most software, this software actually does come with a limited warranty in that we hope that it is fit for its intended purpose and we pledge to try and fix any defects you may find (such defects exist in all software no matter how hard we try to eliminate them) and we pledge to provide a channel of communication for enabling this and other type of feedback. In return for these pledges, though, it is only fair that we are not held liable for any data or hair loss or what-have-you.
+                        </div>
   		</fieldset>
   		</form>
 	
