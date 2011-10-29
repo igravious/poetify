@@ -1,0 +1,14 @@
+<form name="f" id="resize_me_form" action="/borked" class="classy" method=post>
+	<br />
+	<input type="text" name="plus_text" id="plus_text_id" class="" />
+	<input	id='plus' name='the_plus' type='submit' value='+' onclick='javascript:document.f.action="/plus"'/>
+	&nbsp;&nbsp;
+	<input type="text" name="minus_text" id="minus_text_id" class="" />
+	<input	id='minus' name='the_minus' type='submit' value='-' onclick='javascript:document.f.action="/minus"'/>
+	<br />
+	<input	id='bork_id' name='bork_name' type='submit' value='Bork me.'/>
+	<br />
+	<span id="feedback"><?cs var:alert ?></span>
+	<br />
+	<span id="feedback"><?cs var:notice ?></span>
+</form>

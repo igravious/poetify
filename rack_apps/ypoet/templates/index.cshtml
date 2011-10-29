@@ -1,0 +1,96 @@
+	
+	<!-- a href="http://web.durity.com:8080/cgi/epoet_landing_page.cgi" style="position: relative; font-size:400%; font-family:'times new roman',times,georgia,serif; padding:0.5em 0.2em; float:left; margin-left:0; margin-right:0; margin-top:0; margin-bottom; z-index:5">¶</a -->
+	
+	<div id="center_it" style="width:800px;"> <!-- adjust as necessary -->
+	<script>
+	$(window).load(function () {
+		// Handler for .ready() called.
+		the_top = $("#center_it").offset().top;
+ 		the_left = (($(window).width() - 800)/2);
+ 		// alert(the_top + " --- " + the_left);
+ 		$("#center_it").offset({ top: the_top, left: the_left });
+	});
+	
+	function deleteAllCookiesAndReload() {
+    var cookies = document.cookie.split(";");
+
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i];
+        var eqPos = cookie.indexOf("=");
+        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+    window.location.reload();
+}
+	</script>
+  
+  		<div class="cog" style="float:left">
+		<fieldset> <legend class="classy">Welcome</legend> <!-- does fieldset need a form? -->
+			<div id="resize_me">
+			<span>
+			Welcome o seeker of rare pleasures. This is version <i><?cs var:VERSION ?></i> work-in-progress of
+			Poetify and it is for demonstration purposes only - to give you a flavour of
+			the functionality. This has been checked over in Chrome, Firefox, and Safari -
+			Internet Explorer probably does not work yet, awfully sorry about that.
+			</span>
+			<span
+				onmouseover='this.style.cursor="hand";'
+				onmouseout='this.style.cursor="auto";'
+				onclick='javascript: deleteAllCookiesAndReload();'
+			>
+			oh jesus the babies	
+			</span>
+			<?cs include:'flash_test.cshtml' ?>
+			</div>
+		</fieldset>
+		</div>
+	
+		<div class="nocog" style="float:right">
+		<fieldset> <legend class="classy">ePages</legend>
+			<div id="epages"><?cs include:"epages.cshtml" ?></div>
+		</fieldset>
+		</div>
+  
+  		<div class="cog" style="clear:both">
+  		<fieldset> <legend class="classy">Description</legend>
+			<div id="description"><?cs var:Poetify.description ?></div>
+  		</fieldset>
+  		</div>
+		
+		<div class="cog" style="clear:both">
+  		<fieldset> <legend class="classy">Source, Copyright &amp; Warranty</legend>
+			<div>
+				<a href="https://github.com/igravious/poetify">Source Code at Github</a>
+                <br>
+                <i>Copyrighted 2011 by Anthony Durity using materials provided by Jyväskylä University under the <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPL&nbsp;version&nbsp;3</a></i>
+                <br>
+                In contrast to most software, this software actually does come with a limited warranty in that we hope that it is fit for its intended purpose and we pledge to try and fix any defects you may find (such defects exist in all software no matter how hard we try to eliminate them) and we pledge to provide a channel of communication for enabling this and other type of feedback. In return for these pledges, though, it is only fair that we are not held liable for any data or hair loss or what-have-you.
+                <br>
+                Built using many open-source technologies and many open standards:
+                  <a href="http://www.clearsilver.net/docs/man_templates.hdf">ClearSilver</a>,
+                  <a href="http://www.ruby-lang.org/<?cs var:Site.language ?>/">Ruby</a>,
+                  jQuery, HTML5, CSS, Javascript, Git
+            </div>
+  		</fieldset>
+  		</div>
+  		
+	<script>
+		$(window).load(function () {
+			$("#resize_me").css( "width", (640 - $("#epages").width()) );
+			if ($("#epages").height() > $("#resize_me").height()) {
+        		$("#resize_me").css( "height", ($("#epages").height()) );
+        	} else {
+        		$("#epages").css( "height", ($("#resize_me").height()) );
+        	}	
+        });
+	</script>
+	
+	<script>
+		$(function() {
+			// Handler for .ready() is called
+			$('#feedback_alert').css('color', 'green').fadeIn("slow");
+			$('#feedback_notice').css('color', 'orange').fadeIn("slow");
+		});
+</script>
+	
+    <?cs include:"super_duper.html" ?>

@@ -1,0 +1,57 @@
+
+<script src='/javascripts/file-folder-utilities-0.1.js'> </script>
+<script type="text/javascript" src="/javascripts/3rd-party/jquery-simpleTreeMenu-1.2.0.js"></script>
+<link rel="stylesheet" href="/cascading_stylesheets/3rd-party/jquery-simpleTreeMenu-1.2.0.css"/>
+
+<span><i>All&nbsp;pages&nbsp;and&nbsp;folders</i>&nbsp;<img alt='pop up menu' id='the-image' onmouseover='this.style.cursor="hand"; this.src="/images/down-arrow-hover.png"' onmouseout='this.style.cursor="auto"; this.src="/images/down-arrow.png"' style='float:right; display:inline; margin-top: 8px' src='/images/down-arrow.png'></span><hr>
+<script>$('#the-image').toggle(superMenuIn, superMenuOut); var label_array = [];</script>
+
+<ul class="tree">
+	
+<?cs def:display_files(epages) ?>
+  <?cs each:epage = epages ?>
+    <?cs if:epage.kind == -1 ?>
+      <li>
+      <span class='igor'><i><?cs var:epage.label?></i>&nbsp;<img alt='pop up menu' id='the-image-<?cs var:epage.id ?>' onmouseover='this.style.cursor="hand"; this.src="/images/down-arrow-hover.png"' onmouseout='this.style.cursor="auto"; this.src="/images/down-arrow.png"' style='float:right; display:none; margin-top: 8px' src='/images/down-arrow.png'></span>
+      <script>$('#the-image-<?cs var:epage.id ?>').toggle(superMenuIn, superMenuOut); label_array['<?cs var:epage.id ?>'] = '<?cs var:epage.label?>';</script>
+      <ul>
+      <?cs call:display_files(epage.folder) ?>
+      </ul>
+      </li>
+    <?cs else ?>
+      <li><?cs var:epage.symbol ?><a style='display:inline;' href='epage/<?cs var:epage.id ?>'> <?cs var:epage.label ?></a></li>
+    <?cs /if ?>
+  <?cs /each ?>
+<?cs /def ?>
+
+<?cs call:display_files(Epages) ?>
+
+</ul>
+
+<!-- <?cs var:epage.controller ?>?id=<?cs var:epage.id ?>&name=<?cs var:epage.s_label ?> -->
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  	$(".tree").simpleTreeMenu();
+  	$(".tree").simpleTreeMenu('deserialize', 'cookie'); /* session cookie or other? */
+    $(".igor").hover(
+      function () {
+        /*
+        var img_kid = $(this)[0].children[0].children[0];
+        img_kid.setAttribute("style", "float:right; display:inline; margin-top: 8px")
+        */
+        $($(this)[0].children[1]).show();
+      },
+      function () {
+        /*
+        var img_kid = $(this)[0].children[0].children[0];
+        img_kid.setAttribute("style", "float:right; display:none; margin-top: 8px")
+        */
+        $($(this)[0].children[1]).hide();
+      }
+    );
+  });
+  $(window).unload(function() {
+  	$(".tree").simpleTreeMenu('serialize', 'cookie');
+  });
+</script>

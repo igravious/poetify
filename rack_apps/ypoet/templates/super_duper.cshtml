@@ -1,0 +1,107 @@
+<div class='boxed_shadow' style='border:1px solid #808080; background:#EEE; position:absolute; display:none; padding: 3px' id='file-folder'>
+	<!-- menu stuff in here, only when you hover over the file or folder should the menu down arrow appear -->
+	<!-- pressing ESC should make it disappear -->
+	<script type='text/javascript'>
+	
+	if (cancelEvent === undefined)
+	var cancelEvent = function(e) {
+	    if (!e) e = window.event;
+		if (e.preventDefault) {
+			e.preventDefault();
+		} else {
+			e.returnValue = false;
+		}
+	}
+	
+	if (stopEvent === undefined)
+	var stopEvent = function(e) {
+	    if (!e) e = window.event;
+	    if (e.stopPropagation) {
+	        e.stopPropagation();
+	    } else {
+	        e.cancelBubble = true;
+	    }
+	}
+	
+	// http://stackoverflow.com/questions/154059/what-is-the-best-way-to-check-for-an-empty-string-in-javascript
+	// For checking if a string is empty, null or undefined I use:
+	
+	function isItEmpty(str) {
+	    return (!str || 0 === str.length);
+	}
+	
+	// For checking if a string is blank, null or undefined I use:
+	
+	function isItBlank(str) {
+	    return (!str || !str.match(/\S/));
+	}
+	
+	var reject_blank = function(str) {
+		if (isItBlank(str)) {
+			// alert('why, yes it is');
+			stopEvent();
+			return false;
+		} else {
+			// keep going
+			return true;
+		}
+	};
+	
+	</script>
+	<form style='padding-bottom: 10px' name='superDelete' method='POST'>
+		<input type="hidden" name="_method" value="DELETE">
+		<input id='' class='' name='EpageID' type='hidden' value=''/>
+		<span>Delete <i><span id='delete_me'></span></i> folder</span>		
+		<input	id=''
+			onclick='javascript: document.superDelete.focus(); return confirm("Are you super sure?");'
+			class=''
+			name='Submit' 
+			type='submit'
+			value='Sure!'
+		/>
+	</form>
+	<form style='padding-bottom: 10px' name='superRename' method='post'>
+		<input type="hidden" name="_method" value="PUT">
+		<span>Rename it to</span>&nbsp;	
+		<input id='' class='' name='NewObject' type='text' value=''/>
+		<input id='' class='' name='EpageID' type='hidden' value=''/>
+		<input	id=''
+			onclick='javascript: document.superRename.NewObject.focus(); return reject_blank(document.superRename.NewObject.value);'
+			class=''
+			name='Submit' 
+			type='submit'
+			value='Rename!'
+		/>
+	<hr />
+	</form>
+	<form style='padding-bottom: 10px' name='superFolder' method='post'>
+	<input id='' class='' name='NewObject' type='text' value=''/>
+	<input id='' class='' name='EpageID' type='hidden' value=''/>
+	<!-- check for non-null string before clicking -->
+	<input	id=''
+		onclick='javascript: document.superFolder.NewObject.focus(); return reject_blank(document.superFolder.NewObject.value);'
+		class=''
+		name='Submit' 
+		type='submit'
+		value='New Folder!'
+	/>
+	</form>
+	<form name='superPage' method='post'>
+	<input id='' class='' name='NewObject' type='text' value=''/>
+	<input id='' class='' name='EpageID' type='hidden' value=''/>
+	<!-- check for non-null string before clicking -->
+	<input 	id=''
+		onclick='javascript: document.superPage.NewObject.focus(); return reject_blank(document.superPage.NewObject.value);'
+		class=''
+		name='Submit'
+		type='submit'
+		value='New Page!'
+	/>
+	<select name='EpageTYPE'>
+	<option value="1:verse">Singular-Verse</option>
+	<option value="2:verse">Re-Verse</option>
+	<option value="n:verse">Multi-Verse</option>
+	<option value="woven:verse">Woven-Verse</option>
+	</select>
+	</form>
+</div>

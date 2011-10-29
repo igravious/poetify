@@ -1,0 +1,85 @@
+
+<div id="center_it" style="width:800px;"> <!-- adjust as necessary  there must be a non moronic way to do this-->
+	<script>
+	$(window).load(function () {
+		// Handler for .ready() called.
+		the_top = $("#center_it").offset().top;
+ 		the_left = (($(window).width() - 800)/2);
+ 		// alert(the_top + " --- " + the_left);
+ 		$("#center_it").offset({ top: the_top, left: the_left });
+	});
+	
+	function stopEvent(e) {
+    	if (!e) e = window.event;
+    	if (e.stopPropagation) {
+        	e.stopPropagation();
+    	} else {
+        	e.cancelBubble = true;
+    	}
+	}
+	
+	function cancelEvent(e) {
+    	if (!e) e = window.event;
+    	if (e.preventDefault) {
+        	e.preventDefault();
+    	} else {
+        	e.returnValue = false;
+    	}
+	}
+	</script>
+	
+	<!-- put does not work from forms -->
+	<form name='formly' class='classy' method="POST"> <!-- play is POST, save is PUT, publish is POST -->
+	<!-- zpoet is a dumb name, come up with a decent name that does not start with p -->
+	<fieldset> <legend class="classy">Re:Verse</legend>
+	<br />
+	The title of your ePoem: <i><?cs var:title ?></i>
+	<br />
+	<hr />
+	<br />
+	reverse chrnological order (newest version at the top)
+	<input	id=''
+			onclick='javascript: return false;'
+			class=''
+			name='Ch_ch_changes'
+			type='submit'
+			value='View changes between versions X and Y'
+		/>
+	<ul class="version">
+	  <table id="V" class="tabular" border="2" cellspacing="0" cellpadding="7"> 
+		<tr>
+		<th>::</th> 
+		<th>::</th> 
+		<th>::</th> 
+		<th>::</th> 
+		<th>::</th> 
+		<th>::</th> 
+		<th>::</th> 
+		</tr>
+	  <?cs each:version = versions ?>
+		<tr>
+		<td> (cur | prev)<input type="radio"><input type="radio"> </td>
+		<td> <?cs var:version.created_at ?> </td>
+		<td> <?cs var:version.mod ?> </td>
+		<td> <?cs var:version.promote ?> </td>
+		<td> <?cs var:version.revert_to ?> </td>
+		<td> <?cs var:version.erase_to ?> </td>
+		<td> <?cs var:version.star ?> </td>
+		</tr>
+  	  <?cs /each ?>
+	  </table>
+  	</ul>
+	<br />
+	<span style="float:right" >
+		<a href='/epage/<?cs var:id ?>'>back to the poem</a>&nbsp;
+    	<a href='/landing'>back to the landing page</a>		
+	</span>
+	</fieldset>
+	</form>
+</div>
+
+<script>
+$(function() {
+ // Handler for .ready() is called
+});
+</script>
