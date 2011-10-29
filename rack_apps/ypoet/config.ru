@@ -22,10 +22,9 @@
 require 'pry'
 
 require "rubygems"
-require "bundler/setup"
 
-#tarp = 'tarpaulin'
-tarp = File.join(File.expand_path(File.dirname(__FILE__)), 'lib', 'tarpaulin')
+tarp = 'tarpaulin'
+#tarp = File.join(File.expand_path(File.dirname(__FILE__)), 'lib', 'tarpaulin')
 require tarp
 
 #now we have the logger, set the program name
