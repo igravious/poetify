@@ -1,5 +1,7 @@
-Poetify - I said, Poetify
+The Readable Readme
 -----------
+
+### Welcome to Poetify
 
 Poetify is an open-source electronic poetry publishing platform.
 It is essentially code + support. It is machinery. It is an electronic
@@ -11,7 +13,7 @@ face of Poetify. There may be other instances of Poetify. That is the
 nature of the beast. If this idea is to flourish then promiscuity is
 the key.
 
-###
+### Nothing fancy schmancy
 
 Poetify ain’t anything special or fancy. It’s just an idea whose time
 has come.
@@ -37,7 +39,7 @@ to one type of text, it is reusable, it is extendable, it is shareable.
 Poetify brings the spirit of Gutenberg to electronic poetry and mixes
 it with the ideology of open-source.
 
-###
+### Electropoiesis
 
 Electropoiesis will be a multi-user site. It will be populated with
 electronic poets. Each poet will have their own electronic poet notepad.
@@ -58,7 +60,7 @@ classical, re:verse, trace:verse and so on.
  * n:verse
  * trace:verse
 
-###
+### Geek out baby
 
 + Poetify uses many open-source technologies.
  * Ruby
