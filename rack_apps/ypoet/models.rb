@@ -292,14 +292,14 @@ SQL
     # 
     def self.up
       change_table PoemPad.table_name do |t|
-        t.string :session_id, :limit => 32 # should be NOT NUL :(
+        t.string :unique_id, :limit => 32 # should be NOT NUL :(
       end
-      PoemPad.find(3).update_attribute(:session_id, "6b08e5223f1ee2debf3871a23143f37eac664790d4c2439f9f3e0030afda9fb3");
+      PoemPad.find(3).update_attribute(:unique_id, "6b08e5223f1ee2debf3871a23143f37eac664790d4c2439f9f3e0030afda9fb3");
     end
   
     def self.down
       change_table PoemPad.table_name do |t|
-        t.remove :session_id
+        t.remove :unique_id
       end
     end
   end

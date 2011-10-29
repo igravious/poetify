@@ -1,52 +1,55 @@
-#
-# gem goodness - step by step howto
-#
-# http://sirupsen.com/create-your-first-ruby-gem-and-release-it-to-gemcutter/
-#
-# - gem install jeweler
-# - cd rack_apps
-# - jeweler Bivouac
-# * create Eclipse project called TheKommons based from kommons folder
-# * edit Rakefile
-# * edit bivouac.rb
-# - rake
-# uh oh (make tests)
-# - bundle install
-# - bundle show [gemname]
-# - bundle install --binstubs
-# now bin/... bin/rake bin/jeweler bin/rcov
-# bin/rake -T
-# bin/rake version:write
-# bin/rake install
 
-require 'pry'
-
-require "rubygems"
-
-tarp = 'tarpaulin'
-#tarp = File.join(File.expand_path(File.dirname(__FILE__)), 'lib', 'tarpaulin')
-require tarp
+%w{rubygems pry tarpaulin camping camping/session tarpaulin rack-flash}.each{|g| require g}
 
 #now we have the logger, set the program name
-
 $L.progname = "SanSan"
-
-require 'camping'
-require 'camping/session'
-require 'rack-flash'
 
 Camping.goes :YPoet
 
+# you #include stuff to mix it in
+# you #use stuff to chain a middleware
 module YPoet
-  include CampingFlash
+  include CampingFlash # must go first
   include CampingFilters
   
-  use( Rack::Flash, :flash_app_class => self, :accessorize => [:notice, :alert])
-  use Rack::MethodOverride
+  use( Rack::Flash, :flash_app_class => self, :accessorize => [:notice, :alert] ) # Camping invocation of rack-flash
+  use Rack::MethodOverride # for PUT and DELETE
   set :secret, "slartibartfast"
   include Tarpaulin
   include Camping::Session
+end
+
+module YPoet::Helpers
+  include Tarpaulin::Helpers
   
+  def unredirect_with(url)
+    redirect url
+    throw :halt, self
+  end
+  
+  def red_or_dead the_file # make this a rake task
+    require 'redcarpet'
+    Redcarpet.new(File.read(the_file)).to_html
+  end
+  
+end
+  
+module YPoet::Controllers 
+  class DoYouCookie
+    def get
+      if @cookies["already_checked"] == "true"
+        unredirect_with @input.referer
+      else
+        raise "You need cookies enabled to use Poetify for now, sorry"
+      end
+    end
+  end
+end 
+
+module YPoet::Helpers
+end
+
+module YPoet
   def check_for_cookies!
     # oh the magic incantation
     if @env['PATH_INFO'] == R(YPoet::Controllers::DoYouCookie)
@@ -75,13 +78,13 @@ module YPoet
     $stderr.puts "+++ 2"
   end
   
+  # how about cookieless?
+  # All pages and folders lets you change desc. of pad
   # this uses the session, so it's wrong (it'll expire)
   # need to cache
-  def pad_helper
+  def pad_helper_session
     if !@state.session_id
       check_for_cookies! unless @cookies.already_checked
-      # i have no idea how you'd get here
-      # pp @env
       raise "System is very very very broken" if !@env
       raise "System is very very broken" if !@env["rack.session.options"]
       pp @env["rack.session.options"]
@@ -90,38 +93,63 @@ module YPoet
       force_option_id if !@env["rack.session.options"][:id]
     $stderr.puts "+++ 4"
       # @state.temp_session_id = @env["rack.session.options"][:id]
-      p = PoemPad.where(:session_id => @env["rack.session.options"][:id]).first
+      p = PoemPad.where(:unique_id => @env["rack.session.options"][:id]).first
       if p
-        $L.debug "using pad with existing option id: "+@env["rack.session.options"][:id]
+        $L.warn "using pad with existing option id: "+@env["rack.session.options"][:id]
       else
         $L.debug "creating pad with option id: "+@env["rack.session.options"][:id]
-        p = PoemPad.create(:session_id => @env["rack.session.options"][:id])
+        p = PoemPad.create(:unique_id => @env["rack.session.options"][:id])
       end
     else
-      #if @state.temp_session_id
-      #  p = PoemPad.where(:session_id => @state.temp_session_id).first
-      #  p.update_attribute(:session_id, @state.session_id);
-      #  @state.delete("temp_session_id")
-      #end
-      p = PoemPad.where(:session_id => @state.session_id).first
+      p = PoemPad.where(:unique_id => @state.session_id).first
       if p
         $L.debug "using pad with existing session id: "+@state.session_id
       else
         $L.debug "creating pad with session id: "+@state.session_id
-        p = PoemPad.create(:session_id => @state.session_id)
+        p = PoemPad.create(:unique_id => @state.session_id)
       end
     end
-    raise "I can't find you man. Clean your damn cookies!" if !p
+    raise "I can't find you session man. Clean your damn cookies!" if !p
+    @p = p
+  end
+  
+  def perm_pad
+    if !@cookies.remember_me
+      check_for_cookies! unless @cookies.already_checked
+      require 'digest/md5'
+      h = Digest::MD5.hexdigest('slartibartfast'+Time.now.to_s+@env['REMOTE_ADDR'])
+      binding.pry
+      p = PoemPad.where(:unique_id => h).first
+      if p
+        raise "using pad with existing option id: "+h
+      else
+        $L.debug "creating pad with option id: "+h
+        p = PoemPad.create(:unique_id => h)
+        @cookies.remember_me = h
+      end
+    else
+      p = PoemPad.where(:unique_id => @cookies.remember_me).first
+      if p
+        $L.debug "using pad with existing session id: "+@cookies.remember_me
+      else
+        $L.warn "creating pad with session id (why was this not already done?): "+@cookies.remember_me
+        p = PoemPad.create(:unique_id => @cookies.remember_me)
+      end      
+    end
+    raise "I don't remember you man. Clean your damn cookies!" if !p
     @p = p
   end
 
-  
+  # need :all_bar Foo
   before :all do
     $L.debug self.class.to_s.light_red
     $L.debug @env['PATH_INFO'].to_s.light_red
+    #$L.debug @env['HTTP_COOKIE'].red
+    
+    # skip the catch all class
     next if self.class == YPoet::Controllers::Dyn # use next instead of return cuz of Thread/Proc error
-    #$L.debug @env['HTTP_COOKIE'].red    
-    pad_helper
+    #pad_helper_session
+    perm_pad
   end
   
   @@yummy = ''
@@ -178,21 +206,6 @@ module YPoet
 end
 
 require File.here "models"
-
-module YPoet::Helpers
-  include Tarpaulin::Helpers
-  
-  def unredirect_with(url)
-    redirect url
-    throw :halt, self
-  end
-  
-  def red_or_dead the_file # make this a rake task
-    require 'redcarpet'
-    Redcarpet.new(File.read(the_file)).to_html
-  end
-  
-end
 
 module YPoet::Controllers
   class Index # RegexpError: regular expression too big:
@@ -420,16 +433,6 @@ module YPoet::Controllers
     end
   end
   
-  class DoYouCookie
-    def get
-      if @cookies["already_checked"] == "true"
-        unredirect_with @input.referer
-      else
-        raise "You need cookies enabled to use Poetify for now, sorry"
-      end
-    end
-  end
-  
   class Landing
 
     def transform_to_hdf(tree)
@@ -482,17 +485,9 @@ module YPoet::Controllers
     end
     
     def get
-      # need a before filter for this !!
-      # and an after filter for exception handling
-      # and how about cookieless?
-      # All pages and folders lets you change desc. of pad
-      
-      #@p = pad_helper
-
       @title = "Poetify Loves You Very Much"
       @poetify_hd = Neo::Hdf.new
       @poetify_hd.copy "Epages", fill_hdf(@p)
-      # document_root
       @poetify_hd.set_value "VERSION", "0.3.a"
       @poetify_hd.set_value "Poetify.description", red_or_dead('/var/www/localhost/htdocs/README.markdown')      
       @poetify_hd.set_value "notice", env['x-rack.flash'].notice + "&nbsp;" + Time.now.to_s if env['x-rack.flash'].has? :notice
