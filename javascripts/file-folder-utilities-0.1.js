@@ -18,8 +18,19 @@ var superMenuIn = function(ev) {
   // get the position and width an height of the placeholder element
   var curr_id = ev.currentTarget.id;
   var target = "#"+curr_id;
-  document.superFolder.EpageID.value = curr_id.split('-')[2];
-  document.superPage.EpageID.value = curr_id.split('-')[2];
+  var val = curr_id.split('-')[2];
+  if(val === undefined) {
+  	$(document.superDelete).hide();
+  	$(document.superRename).hide();
+  } else {
+  	document.superRename.EpageID.value = val;
+  	document.superDelete.EpageID.value = val;
+  	$('#delete_me').html( label_array[val] );
+  	$(document.superRename).show();
+  	$(document.superDelete).show();
+  }
+  document.superFolder.EpageID.value = val;
+  document.superPage.EpageID.value = val;
   var pos = $(target).offset();  
   var width = $(target).width();
   var height = $(target).height();
@@ -40,7 +51,7 @@ var superMenuIn = function(ev) {
   // $("#custom-stuff").append(curr_id);
   
   $("#file-folder").show();
-  document.superFolder.NewObject.focus();
+  document.superPage.NewObject.focus();
   
   // 
   $("#file-folder").keyup(function(eventage) {
