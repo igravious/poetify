@@ -1,4 +1,4 @@
 
-class Epoem
+class EPoem
 
 end

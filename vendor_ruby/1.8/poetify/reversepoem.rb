@@ -4,6 +4,10 @@
 # to use as a namespace just mod::
 
 module ReversePoem
+  
+  # use snake_case
+  require File.here 'commonpoem'
+  include CommonPoem
 
 	def self.poem_body params
 		{ :poem0 => params['poem0'], :poem1 => params['poem1'] }
@@ -14,7 +18,7 @@ module ReversePoem
 	end
 	
 	def self.render
-		:template_reverse
+		:play_with_reverse
 	end
 	
 	# functions that are included in the controllers
