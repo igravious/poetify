@@ -1,7 +1,11 @@
 
 form.classy {
-	background-color: #eeeeee;
-	/* text-shadow: 5px 5px 0px silver; */
+	background: #EEE;
+}
+
+fieldset {
+    border: 1px olive;
+    border-style: outset;
 }
 
 legend.classy {
@@ -19,8 +23,27 @@ legend.classy {
 	box-shadow: 3px 3px 0px silver;
 	/* For IE 8 */
 	-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='silver')";
-	/* For IE 5.5 - 7 */
-	filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='silver');
+}
+
+div.landing {
+	
+}
+
+div.nocog {
+	background: #EEE;
+	padding: 0.25em 1em 0.5em 0.5em;
+    margin-bottom: 1em;
+}
+
+div.cog {
+	background: #EEE url(/images/i-am-a-cog.gif) no-repeat left top;
+	padding: 0.25em 1em 0.5em 48px;
+    margin-bottom: 1em;
+}
+
+/* Remove bottom margin of paragraphs in special boxes, otherwise they get a spurious blank area below with the box background. */
+div.cog p div.nocog p {
+    margin-bottom: 1em;
 }
 
 .igor {}
