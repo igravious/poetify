@@ -84,14 +84,14 @@
 		},
 		
 		toLocalStorage: function(state) {
-			if (private.hasLocalStorage() === true) {
-				localStorage.setItem(private.localStorageKey.apply(this), state.join()); // does it default to , ?
+			if (prv.hasLocalStorage() === true) {
+				localStorage.setItem(prv.localStorageKey.apply(this), state.join()); // does it default to , ?
 			}
 		},
 		
 		fromLocalStorage: function() {
-			if (private.hasLocalStorage() === true) {
-				state = localStorage.getItem(private.localStorageKey.apply(this))
+			if (prv.hasLocalStorage() === true) {
+				state = localStorage.getItem(prv.localStorageKey.apply(this))
 				if (state != null) {
 					state = state.split(",");
 					if (state.length > 0) {
@@ -103,11 +103,11 @@
 		},
 		
 		toCookieJar: function(state) {
-			private.createCookie(private.localStorageKeyPrefix, JSON.stringify(state), 1);
+			prv.createCookie(prv.localStorageKeyPrefix, JSON.stringify(state), 1);
 		},
 		
 		fromCookieJar: function() {
-			return eval('(' + private.readCookie(private.localStorageKeyPrefix) + ')');
+			return eval('(' + prv.readCookie(prv.localStorageKeyPrefix) + ')');
 		},
 		
 		serialize: function(storage) {
@@ -164,7 +164,8 @@
 		
 	};
 	
-	var private = {
+	/* private stuff */
+	var prv = {
 		
 		localStorageKeyPrefix: "jQuery-simpleTreeMenu-treeState-",
 		
@@ -178,7 +179,7 @@
 		},
 				
 		localStorageKey: function() {
-			return private.localStorageKeyPrefix + $(this).attr("id");
+			return prv.localStorageKeyPrefix + $(this).attr("id");
 		},
 		
 		createCookie: function(name,value,days) {

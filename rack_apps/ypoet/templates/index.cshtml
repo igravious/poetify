@@ -27,20 +27,12 @@
   		<div class="cog" style="float:left">
 		<fieldset> <legend class="classy">Welcome</legend> <!-- does fieldset need a form? -->
 			<div id="resize_me">
-			<span>
-			Welcome o seeker of rare pleasures. This is version <i><?cs var:VERSION ?></i> work-in-progress of
+			<span><?cs var:_("Welcome") ?>, o seeker of rare pleasures. This is version <i><?cs var:VERSION ?></i> work-in-progress of
 			Poetify and it is for demonstration purposes only - to give you a flavour of
 			the functionality. This has been checked over in Chrome, Firefox, and Safari -
 			Internet Explorer probably does not work yet, awfully sorry about that.
 			</span>
-			<span
-				onmouseover='this.style.cursor="hand";'
-				onmouseout='this.style.cursor="auto";'
-				onclick='javascript: deleteAllCookiesAndReload();'
-			>
-			oh jesus the babies	
-			</span>
-			<?cs include:'flash_test.cshtml' ?>
+			<?cs if:admin ?><?cs include:'admin_box.cshtml' ?><?cs else ?><?cs /if ?>
 			</div>
 		</fieldset>
 		</div>

@@ -1,8 +1,12 @@
 
-%w{rubygems pry tarpaulin camping camping/session tarpaulin rack-flash}.each{|g| require g}
+#$DEBUG=true
+
+%w{rubygems pry camping camping/session tarpaulin rack-flash}.each{|g| require g}
 
 #now we have the logger, set the program name
 $L.progname = "SanSan"
+$L.debug "Current working directory is: "+Dir.getwd
+Neo::Cs.bindtextdomain "poetify", Dir.getwd+"/locale"
 
 Camping.goes :YPoet
 
@@ -62,7 +66,8 @@ module YPoet
       @headers.merge!( 'Location'=>URL(YPoet::Controllers::DoYouCookie).to_s+"?referer=#{@env['PATH_INFO']}" )
       @body = ''
       response = Rack::Response.new @body, @status, @headers
-      response.set_cookie("already_checked", {:value => "true", :path => "/", :expires => Time.now+10*60})
+      #response.set_cookie("already_checked", {:value => "true", :path => "/", :expires => Time.now+10*60})
+      response.set_cookie("already_checked", true)
       response.finish
     end
     @status = response.status.to_i
@@ -82,50 +87,18 @@ module YPoet
   # All pages and folders lets you change desc. of pad
   # this uses the session, so it's wrong (it'll expire)
   # need to cache
-  def pad_helper_session
-    if !@state.session_id
-      check_for_cookies! unless @cookies.already_checked
-      raise "System is very very very broken" if !@env
-      raise "System is very very broken" if !@env["rack.session.options"]
-      pp @env["rack.session.options"]
-      #raise "System is very broken" if !@env["rack.session.options"][:id]
-    $stderr.puts "+++ 3"
-      force_option_id if !@env["rack.session.options"][:id]
-    $stderr.puts "+++ 4"
-      # @state.temp_session_id = @env["rack.session.options"][:id]
-      p = PoemPad.where(:unique_id => @env["rack.session.options"][:id]).first
-      if p
-        $L.warn "using pad with existing option id: "+@env["rack.session.options"][:id]
-      else
-        $L.debug "creating pad with option id: "+@env["rack.session.options"][:id]
-        p = PoemPad.create(:unique_id => @env["rack.session.options"][:id])
-      end
-    else
-      p = PoemPad.where(:unique_id => @state.session_id).first
-      if p
-        $L.debug "using pad with existing session id: "+@state.session_id
-      else
-        $L.debug "creating pad with session id: "+@state.session_id
-        p = PoemPad.create(:unique_id => @state.session_id)
-      end
-    end
-    raise "I can't find you session man. Clean your damn cookies!" if !p
-    @p = p
-  end
-  
   def perm_pad
     if !@cookies.remember_me
       check_for_cookies! unless @cookies.already_checked
-      require 'digest/md5'
-      h = Digest::MD5.hexdigest('slartibartfast'+Time.now.to_s+@env['REMOTE_ADDR'])
-      binding.pry
+      require 'digest'
+      h = Digest::SHA2.hexdigest('slartibartfast'+Time.now.to_s+@env['REMOTE_ADDR'])
       p = PoemPad.where(:unique_id => h).first
       if p
         raise "using pad with existing option id: "+h
       else
         $L.debug "creating pad with option id: "+h
         p = PoemPad.create(:unique_id => h)
-        @cookies.remember_me = h
+        @cookies.remember_me = {:value => h, :path => "/", :expires => Time.now+365*24*60*60, :httponly => true}
       end
     else
       p = PoemPad.where(:unique_id => @cookies.remember_me).first
@@ -142,8 +115,13 @@ module YPoet
 
   # need :all_bar Foo
   before :all do
-    $L.debug self.class.to_s.light_red
-    $L.debug @env['PATH_INFO'].to_s.light_red
+    #require 'gettext'
+    #need true gettext C ext for Ruby
+    #GetText::set_locale('it_IT.UTF-8')
+    #GetText::bindtextdomain('poetify', :path => Dir.getwd+'/locale')
+    #GetText::textdomain('poetify')
+    #$L.debug self.class.to_s.light_red
+    #$L.debug @env['PATH_INFO'].to_s.light_red
     #$L.debug @env['HTTP_COOKIE'].red
     
     # skip the catch all class
@@ -257,6 +235,13 @@ module YPoet::Controllers
       @state.foo = 3.14
       $L.error { e.message } # should pass in e and have the logger decide whether backtrace is printed or not
     ensure
+      redirect YPoet::Controllers::Landing
+    end
+  end
+  
+  class Inspect
+    def post
+      binding.pry
       redirect YPoet::Controllers::Landing
     end
   end
@@ -484,10 +469,21 @@ module YPoet::Controllers
       y  
     end
     
+    def admin
+      if @p.unique_id == "92dae58c93ce1cd9cf5728f8b02b955a392bcc64b89ad8d8a4200bbbb9e04c61"
+        $L.debug "admin goodnes"
+        return true
+      end
+      return false
+    end
+    
     def get
       @title = "Poetify Loves You Very Much"
       @poetify_hd = Neo::Hdf.new
       @poetify_hd.copy "Epages", fill_hdf(@p)
+      if admin
+        @poetify_hd.set_value 'admin', true
+      end
       @poetify_hd.set_value "VERSION", "0.3.a"
       @poetify_hd.set_value "Poetify.description", red_or_dead('/var/www/localhost/htdocs/README.markdown')      
       @poetify_hd.set_value "notice", env['x-rack.flash'].notice + "&nbsp;" + Time.now.to_s if env['x-rack.flash'].has? :notice
@@ -639,7 +635,8 @@ module YPoet::Views
   end # end layout
   
   def internal_index
-    render(:index, {:layout => false}) do
+    #print @poetify_hd.dump
+    render(:index, {:locals => {:locale => 'it_IT.UTF-8'}, :layout => false}) do
       @poetify_hd
     end
   end
