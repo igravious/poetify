@@ -100,7 +100,7 @@ class EPoem
 
   def self.rename_folder( the_folder, the_id ) # should all these be wrapped in rescues and such?
     begin        
-      if the_id.nil? or the_folder.nil? or the_folder == '' 
+      if the_id.nil? or the_folder.nil? or '' == the_folder 
         raise "can't rename that which is unrenameable"
       else
         where_clause = "WHERE t.parent_id = #{the_id}"
@@ -114,6 +114,92 @@ class EPoem
       *rows = EPoem.db.execute( "UPDATE ePages SET label = '#{the_folder}' WHERE epage_id = #{the_id}" )
       EPoem.db.commit
     rescue => boom
+      EPoem.db.rollback # can you do a rollback without a transaction if another error gets us here?
+      $L.error { boom }
+    end
+  end
+    
+  def self.move_to_folder( source, target ) # should all these be wrapped in rescues and such?
+    begin
+      # update the parent_id of source to be target so long as
+      # A. source is a valid ID yielding any entry in TreePaths
+      # B. target is a valid ID yielding a folder entry in TP or
+      # C.        (some-special-value), indicating top folder
+      # D. belong to the same pad
+      # E. source cannot be a parent of target or it'll get all tangled up
+      # ok?
+      
+      # A.
+      if source.nil? or !source.respond_to?(:to_i)
+        raise "can't move that which is unmoveable"
+      else
+        where_clause = "WHERE t.epage_id = #{source.to_i}"
+      end
+      s_columns, *s_rows = EPoem.db.execute2( "SELECT t.*,e.* FROM TreePaths t JOIN ePages e ON t.epage_id = e.epage_id #{where_clause}")
+      pp s_columns
+      pp s_rows
+      # s_columns is unused
+      # s_col_epage_id = s_columns.find_index("epage_id")
+      # s_col_kind = s_columns.find_index("kind")
+      # s_col_label = s_columns.find_index("label")
+      if 1 != s_rows.length
+        raise "where is the source, that's what I want to know"
+      end
+      source = source.to_i
+      
+      # B. C.
+      if target.nil? or !target.respond_to?(:to_i)
+        raise "can't move that which is unmoveable"
+      else
+        if 0 == target.to_i # or whatever it is
+          target = "NULL"; # we know this is a folder
+        else
+          where_clause = "WHERE t.epage_id = #{target.to_i}"
+          t_columns, *t_rows = EPoem.db.execute2( "SELECT t.*,e.* FROM TreePaths t JOIN ePages e ON t.epage_id = e.epage_id #{where_clause}")
+          pp t_columns
+          pp t_rows
+          # t_columns is unused
+          # t_col_epage_id = t_columns.find_index("epage_id")
+          # t_col_kind = t_columns.find_index("kind")
+          # t_col_label = t_columns.find_index("label")
+          # is the kind of this a folder kind?
+          fail("target not a folder, my goodness!!") unless t_rows.first[t_columns.find_index("kind")] == folder_kind
+          if t_rows.length != 1
+            raise "where is the target, that's what I want to know"
+          end
+          target = target.to_i
+        end
+      end
+      
+      # D.
+      # source.pad_id == target.pad_id (or target is NULL)
+      if target == "NULL" or t_rows.first[t_columns.find_index("pad_id")] == s_rows.first[s_columns.find_index("pad_id")]
+
+        # E.
+        # source cannot be some kind of parent of target
+        # repeatedly recurse (could hold comma separated list in a column called flatten for optimization)
+        # keep getting parent id of target until NULL or match, NULL = ok, match = fail
+        
+        # TODO do in UI as well
+                
+        if target != "NULL"
+          this_target = target
+          begin
+            raise "source is of dubious parentage" if this_target == source
+          end while (tree_path = TreePath.where(:epage_id => this_target)).length > 0 and this_target = tree_path.first.parent_id
+        end
+
+        EPoem.db.transaction
+        # update source id's parent id with either NULL or target id
+        *rows = EPoem.db.execute( "UPDATE TreePaths SET parent_id = #{target} WHERE epage_id = #{source}" )
+        EPoem.db.commit
+        
+      else
+        raise "that would be a pad mismatch"
+      end
+      
+    rescue => boom
+      EPoem.db.transaction_active? and EPoem.db.rollback
       $L.error { boom }
     end
   end

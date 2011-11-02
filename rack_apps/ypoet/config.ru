@@ -439,6 +439,13 @@ module YPoet::Controllers
     end
   end
   
+  class EpageMoveNN
+    def post(source,target)
+      EPoem.move_to_folder( source, target )
+      redirect Landing
+    end
+  end
+  
   class Landing
 
     def transform_to_hdf(tree)
@@ -627,7 +634,7 @@ module YPoet::Controllers
     end
     
     def post(*unsupported)
-      raise "unsupported verb"
+      raise "unsupported verb in dyno-boy!!"
     end
     
   end
@@ -658,13 +665,16 @@ module YPoet::Views
 
         link "rel" => "stylesheet", "href" => "/cascading_stylesheets/poetify.css"
 
-        script "src" => "javascripts/3rd-party/modernizr-2.0.6.min.js" do
+        script "src" => "/javascripts/3rd-party/modernizr-2.0.6.min.js" do
           
-        #javascript_link_tag "//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"
-        script "src" => "//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" do
+        #javascript_link_tag "//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"
+        script "src" => "//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" do
         end
         script do
-          text "window.jQuery || document.write('<script src=\"javascripts/3rd-party/jquery-1.6.2.min.js\"><\\/script>')"
+          text "window.jQuery || document.write('<script src=\"/javascripts/3rd-party/jquery-1.6.4.min.js\"><\\/script>')"
+        end
+        # "//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js""
+        script "src" => "/javascripts/3rd-party/jquery-ui-1.8.16.custom.min.js" do
         end
 
         end
