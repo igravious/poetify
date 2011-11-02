@@ -14,9 +14,11 @@ Camping.goes :YPoet
 # you #use stuff to chain a middleware
 module YPoet
   include CampingFlash # must go first
-  include CampingFilters
+  include CampingHooks
+  include HttpAcceptLanguage
   
-  use( Rack::Flash, :flash_app_class => self, :accessorize => [:notice, :alert] ) # Camping invocation of rack-flash
+  # Camping invocation of rack-flash
+  use( Rack::Flash, :flash_app_class => self, :accessorize => [:notice, :alert] )
   use Rack::MethodOverride # for PUT and DELETE
   set :secret, "slartibartfast"
   include Tarpaulin
@@ -36,6 +38,13 @@ module YPoet::Helpers
     Redcarpet.new(File.read(the_file)).to_html
   end
   
+  def link_controller
+    TheApp::Controllers::Dyn
+  end
+  
+  def lingua
+    {:locale => @locale.first.gsub('-','_')+'.UTF-8'}
+  end
 end
   
 module YPoet::Controllers 
@@ -112,9 +121,9 @@ module YPoet
     raise "I don't remember you man. Clean your damn cookies!" if !p
     @p = p
   end
-
+  
   # need :all_bar Foo
-  before :all do
+  hook :before_service => :all do
     #require 'gettext'
     #need true gettext C ext for Ruby
     #GetText::set_locale('it_IT.UTF-8')
@@ -123,7 +132,10 @@ module YPoet
     #$L.debug self.class.to_s.light_red
     #$L.debug @env['PATH_INFO'].to_s.light_red
     #$L.debug @env['HTTP_COOKIE'].red
-    
+
+    next if self.class == YPoet::Controllers::I
+    @locale = user_preferred_languages
+    @language = compatible_language_from(['it', 'en'])    
     # skip the catch all class
     next if self.class == YPoet::Controllers::Dyn # use next instead of return cuz of Thread/Proc error
     #pad_helper_session
@@ -152,10 +164,10 @@ module YPoet
 
   set :views, self.this_is_where_the_templates_are_found
 
-  def self.add_ruby_and_co_to_library_load_path path_to_ruby #:nodoc:
-    $:.unshift(path_to_ruby) if !$:.include?(path_to_ruby)
-    path_to_ruby = File.join(path_to_ruby,"1.8")
-    $:.unshift(path_to_ruby) if !$:.include?(path_to_ruby)
+  def self.add_ruby_and_co_2_load_path path_2_ruby #:nodoc:
+    $:.unshift(path_2_ruby) if !$:.include?(path_2_ruby)
+    path_2_ruby = File.join(path_2_ruby,"1.8")
+    $:.unshift(path_2_ruby) if !$:.include?(path_2_ruby)
   end
   
   @@loaded = false # um, should this be self. or @@ :(
@@ -168,7 +180,7 @@ module YPoet
       @@loaded = true
       yml = self.gimme_yml
       path_to_ruby = yml['locations']['vendor_ruby']
-      self.add_ruby_and_co_to_library_load_path path_to_ruby
+      self.add_ruby_and_co_2_load_path path_to_ruby
       require 'rubygems'
       require 'active_record'
       # db URLs à la here: http://devcenter.heroku.com/articles/rack
@@ -230,10 +242,12 @@ module YPoet::Controllers
     def post
       raise "raised a generic error"
     rescue => e
-      env['x-rack.flash'].alert = e.message # should pass in e and have the flash print dev e.message or friendly user message
+      # should pass in e and have the flash print dev e.message or friendly user message
+      env['x-rack.flash'].alert = e.message
       flash[:notice] = "This really is a pain in the neck" # nice, flash works ...
       @state.foo = 3.14
-      $L.error { e.message } # should pass in e and have the logger decide whether backtrace is printed or not
+      # should pass in e and have the logger decide whether backtrace is printed or not
+      $L.error { e.message }
     ensure
       redirect YPoet::Controllers::Landing
     end
@@ -317,10 +331,12 @@ module YPoet::Controllers
       @id = id
       epage = EPage.find(@id)
       poem_title = @request.POST()['ePoem_title']
-      if @request.POST()['new_ePage_name'] != '' and @request.POST()['new_ePage_name'] != @request.POST()['old_ePage_name']
-        @poem_label = @request.POST()['new_ePage_name']
+      n = @request.POST()['new_ePage_name']
+      o = @request.POST()['old_ePage_name']
+      if n != '' and n != o
+        @poem_label = n
       else
-        @poem_label = @request.POST()['old_ePage_name']
+        @poem_label = o
       end
       epage.update_attributes(
         # ePoem_title => table::title (can be nil)
@@ -379,30 +395,35 @@ module YPoet::Controllers
       poem = Neo::Hdf.new
       poem.set_value "id", id
       mods = epage.versions.length # does not include first version
+      
+      promote = YPoet::Controllers::EpagePromoteN
+      revert = YPoet::Controllers::EpageRevertToN
+      erase = YPoet::Controllers::EpageEraseToN
 
       mods.downto(1) do |n|
         poem.set_value "versions.#{n+1}.number", (n+1)
         poem.set_value "versions.#{n+1}.created_at", (strip_tz_offest epage.versions[n-1].created_at)
         poem.set_value "versions.#{n+1}.mod", (mods==n ? "latest version" : "modification")
-        poem.set_value "versions.#{n+1}.promote", link_to(id, YPoet::Controllers::EpagePromoteN, n+1)
+        poem.set_value "versions.#{n+1}.promote", link_to(id, promote, n+1)
         poem.set_value "versions.#{n+1}.j_promote", ''
-        poem.set_value "versions.#{n+1}.revert_to", (epage.version==n+1 ? '_' : link_to(id, YPoet::Controllers::EpageRevertToN, n+1))
+        poem.set_value "versions.#{n+1}.revert_to", (epage.version==n+1 ? '_' : link_to(id, revert, n+1))
         poem.set_value "versions.#{n+1}.j_revert_to", ''
-        poem.set_value "versions.#{n+1}.erase_to", link_to(id, YPoet::Controllers::EpageEraseToN, n+1)
+        poem.set_value "versions.#{n+1}.erase_to", link_to(id, erase, n+1)
         poem.set_value "versions.#{n+1}.j_erase_to", ''
         poem.set_value "versions.#{n+1}.star", (n+1) == epage.version ? '*' : ''
       end
       poem.set_value "versions.#{mods+1}.promote", '_' # overwrite latest to do nothing
       poem.set_value "versions.#{mods+1}.erase_to", '_' # ditto
       
+      # timeless, shrouded in the mists of time
       poem.set_value "versions.1.number", 1
-      poem.set_value "versions.1.created_at", epage.created_at ? (strip_tz_offest epage.created_at) : "unknown" # timeless, shrouded in the mists of time
+      poem.set_value "versions.1.created_at", epage.created_at ? (strip_tz_offest epage.created_at) : "unknown"
       poem.set_value "versions.1.mod", "initial version"
-      poem.set_value "versions.1.promote", link_to(id, YPoet::Controllers::EpagePromoteN, 1)
+      poem.set_value "versions.1.promote", link_to(id, promote, 1)
       poem.set_value "versions.1.j_promote", ''
-      poem.set_value "versions.1.revert_to", (1 == epage.version ? '_' : link_to(id, YPoet::Controllers::EpageRevertToN, 1))
+      poem.set_value "versions.1.revert_to", (1 == epage.version ? '_' : link_to(id, revert, 1))
       poem.set_value "versions.1.j_revert_to", ''       
-      poem.set_value "versions.1.erase_to", link_to(id, YPoet::Controllers::EpageEraseToN, 1)
+      poem.set_value "versions.1.erase_to", link_to(id, erase, 1)
       poem.set_value "versions.1.j_erase_to", ''
       poem.set_value "versions.1.star", 1 == epage.version ? '*' : ''
 
@@ -471,7 +492,7 @@ module YPoet::Controllers
     
     def admin
       if @p.unique_id == "92dae58c93ce1cd9cf5728f8b02b955a392bcc64b89ad8d8a4200bbbb9e04c61"
-        $L.debug "admin goodnes"
+        $L.debug "admin goodness"
         return true
       end
       return false
@@ -485,9 +506,10 @@ module YPoet::Controllers
         @poetify_hd.set_value 'admin', true
       end
       @poetify_hd.set_value "VERSION", "0.3.a"
-      @poetify_hd.set_value "Poetify.description", red_or_dead('/var/www/localhost/htdocs/README.markdown')      
-      @poetify_hd.set_value "notice", env['x-rack.flash'].notice + "&nbsp;" + Time.now.to_s if env['x-rack.flash'].has? :notice
-      @poetify_hd.set_value "alert",  env['x-rack.flash'].alert +  "&nbsp;" + Time.now.to_s if env['x-rack.flash'].has? :alert
+      @poetify_hd.set_value "Poetify.description", red_or_dead('/var/www/localhost/htdocs/README.markdown')
+      t = "&nbsp;" + Time.now.to_s
+      @poetify_hd.set_value "notice", env['x-rack.flash'].notice + t if env['x-rack.flash'].has? :notice
+      @poetify_hd.set_value "alert",  env['x-rack.flash'].alert + t if env['x-rack.flash'].has? :alert
       render :internal_index
     end
     
@@ -557,7 +579,8 @@ module YPoet::Controllers
   
   class CatchRelativePath < R("([^/].+)")
     def get(path)
-      if path.ends_with?(".cshtml", ".html", ".rhtml", ".erb") # and others surely, tilt must handle them for our proj
+      # and others surely, tilt must handle them for our proj
+      if path.ends_with?(".cshtml", ".html", ".rhtml", ".erb")
         pos = path =~ /(\.cshtml)|(\.html)|(\.rhtml)|(\.erb)$/ # how to do this metaproggy?
         v = path[0..pos-1]
       else
@@ -578,7 +601,8 @@ module YPoet::Controllers
   class Dyn < R ''
     
     def self.urls
-      endless_path("/([^/]+)",1) # capture starts with / then followed by one or more of anything but forward slash
+      # capture starts with / then followed by one or more of anything but forward slash
+      endless_path("/([^/]+)",1)
     end
     
     require 'mime/types'
@@ -607,36 +631,70 @@ module YPoet::Controllers
     end
     
   end
-  
-  Tarpaulin.link_controller = YPoet::Controllers::Dyn
 end
 
 module YPoet::Views
   
-  def layout
-    html_five do
+    def layout
+    
+    comments = []
+    comments << '[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]'
+    comments << '[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]'
+    comments << '[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]'
+    comments << '[if gt IE 8]><!'
+    html_five({:class => "no-js", :lang => @language}, comments) do
+      
       # how to simply get which controller we came from?
+      comment! '<![endif]'
+      
       head do
-        title @title
-        javascript_link_tag 'https://www.google.com/jsapi?key=ABQIAAAAUzJ_6UqPfuuygp9Xo0AGoxRYjYHH-N6Ytftz1YKT8IaSgMm3fBSIC090wMAgB4Mcecyj6FsiJdo98g'
+        meta "http-equiv" => "X-UA-Compatible", "content" => "IE=edge,chrome=1"
         
-        javascript_link_tag 'https://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js'
+        title @title
+        meta "name" => "description", "content" => "The Electronic Poetry Publishing Platform"
+        meta "name" => "author", "content" => "Anthony Durity"
+        
+        meta "name" => "viewport", "content" => "width=device-width,initial-scale=1"
 
-        stylesheet_link_tag 'poetify'
+        link "rel" => "stylesheet", "href" => "/cascading_stylesheets/poetify.css"
+
+        script "src" => "javascripts/3rd-party/modernizr-2.0.6.min.js" do
+          
+        #javascript_link_tag "//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"
+        script "src" => "//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" do
+        end
+        script do
+          text "window.jQuery || document.write('<script src=\"javascripts/3rd-party/jquery-1.6.2.min.js\"><\\/script>')"
+        end
+
+        end
       end
       body do
-        self << yield
-        # rb info or it didn't happen
-        #methods.sort.each do |m_var|
-        #  pre m_var
-        #end
+        div.container! do
+          #binding.pry
+          header do
+          end
+          div.main!(:role => "main") do
+            self << yield
+          end
+          footer do
+          end
+        end
+        
+        comment! '! end of #container '
+
+        comment!  '[if lt IE 7 ]>'+
+                  '<script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.2/CFInstall.min.js"></script>'+
+                  '<script>window.attachEvent("onload",function(){CFInstall.check({mode:"overlay"})})</script>'+
+                  '<![endif]'
+
       end # end body
     end # end html
   end # end layout
   
   def internal_index
     #print @poetify_hd.dump
-    render(:index, {:locals => {:locale => 'it_IT.UTF-8'}, :layout => false}) do
+    render(:index, {:locals => lingua, :layout => false}) do
       @poetify_hd
     end
   end
@@ -666,4 +724,32 @@ module YPoet
     EPoem.autoload
   end
 
+end
+
+#
+# this does nothing in Camping server/console, just needed for pure Rack Apps?
+#
+
+case ENV['RACK_ENV']
+  when 'development'
+    # set a mode var?
+    $L.info { "i'm in rack dev mode" }
+    ENV['MODE'] = 'development'
+  when 'production'
+    # set a mode var?
+    $L.info { "i'm in rack live mode" }
+    ENV['MODE'] ||= 'production'
+    run LayItOut
+  else
+    ENV['MODE'] = nil
+end
+
+if __FILE__ == $0
+  # this library may be run as a standalone script
+  # as in -> ruby rack_apps/zpoet/config.ru
+  # dunno why you'd want to do that but anyway
+  
+  # set a mode var?
+  $L.info { "i'm in standalone mode" }
+  ENV['MODE']='standalone'
 end
