@@ -74,6 +74,18 @@
 		/>
 	<hr />
 	</form>
+	<form style='padding-bottom: 10px' name='superTrash' method='POST'>
+		<input type="hidden" name="_method" value="PUT">
+		<input id='' class='' name='EpageID' type='hidden' value=''/>
+		<span><i>Empty trash</i></span>		
+		<input	id=''
+			onclick='javascript: document.superTrash.focus(); if (confirm("Are you super sure?")) {document.superTrash.action = "/empty/trash"; return true;} else {return false;};'
+			class=''
+			name='Submit' 
+			type='submit'
+			value='Okey dokey!'
+		/>
+	</form>
 	<form style='padding-bottom: 10px' name='superFolder' method='post'>
 	<input id='' class='' name='NewObject' type='text' value=''/>
 	<input id='' class='' name='EpageID' type='hidden' value=''/>

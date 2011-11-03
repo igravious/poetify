@@ -142,6 +142,9 @@ module YPoet
     perm_pad
   end
   
+  hook :after_service => :all do
+  end
+  
   @@yummy = ''
   def self.gimme_yml
     require 'yaml'
@@ -245,7 +248,7 @@ module YPoet::Controllers
       # should pass in e and have the flash print dev e.message or friendly user message
       env['x-rack.flash'].alert = e.message
       flash[:notice] = "This really is a pain in the neck" # nice, flash works ...
-      @state.foo = 3.14
+      binding.pry
       # should pass in e and have the logger decide whether backtrace is printed or not
       $L.error { e.message }
     ensure
@@ -299,25 +302,27 @@ module YPoet::Controllers
       poem.set_value "title", epage[:title]
       poem.set_value "version", epage.version
       @title = 'your lovely little poem'
+      poem0 = ""
+      if !epage[:body].nil? and !epage[:body][:poem0].nil? and !epage[:body][:poem0].empty?
+        poem0 = epage[:body][:poem0]
+      end
+      poem.set_value "poem0", poem0
       case epage[:kind]
         when 1
           v = :singular
         when 2
-          poem0 = ""
-          if !epage[:body].nil? and !epage[:body][:poem0].nil? and !epage[:body][:poem0].empty?
-            poem0 = epage[:body][:poem0]
-          end
-          poem.set_value "poem0", poem0
-          poem1 = ""
-          if !epage[:body].nil? and !epage[:body][:poem1].nil? and !epage[:body][:poem1].empty?
-            poem1 = epage[:body][:poem1]
-          end
-          poem.set_value "poem1", poem1
           v = :reverse
         when 3
           v = :multiverse
         when 4
           v = :traceverse
+      end
+      if epage[:kind] == 2 or epage[:kind] == 4
+        poem1 = ""
+        if !epage[:body].nil? and !epage[:body][:poem1].nil? and !epage[:body][:poem1].empty?
+          poem1 = epage[:body][:poem1]
+        end
+        poem.set_value "poem1", poem1
       end
       render(v) { poem }
     end
@@ -351,6 +356,17 @@ module YPoet::Controllers
       # set correct href, action, src using CS
       redirect R(self.class, @id)
       # redirect R(YPoet::Controllers::EpageN, @id)
+    end
+    
+    # trash should
+    # A. appear localized
+    # B. at the bottom
+    # can't create or move or delete stuff from it or to it
+    # pages in it are either unviewable or viewable readonly
+    
+    def delete(id)
+      EPoem.trash_epage(@p, id)
+      redirect YPoet::Controllers::Landing
     end
   end
 
@@ -448,7 +464,7 @@ module YPoet::Controllers
   
   class Landing
 
-    def transform_to_hdf(tree)
+    def transform_to_hdf(tree, allow_drag = true)
       h = Neo::Hdf.new
       tree.each do |p|
         key = p[0]
@@ -459,12 +475,22 @@ module YPoet::Controllers
         h.set_value "#{key}.id", key
         h.set_value "#{key}.kind", kind
         h.set_value "#{key}.s_label", s_label
+        h.set_value "#{key}.draggable", "drag_me" if allow_drag
         h.set_value "#{key}.label", s_label.gsub(/ /,"&nbsp;")
         #pp key
         #pp val
         if kind == EPoem.folder_kind
+          allow_drag = true
+          if s_label == "Trash"
+            next_allow_drag = false
+            h.set_value "#{key}.draggable", ""
+          else
+            h.set_value "#{key}.drop_on_able", "drop_on_me"
+            h.set_value "#{key}.unrestricted", true
+            next_allow_drag = true
+          end
           folder = val[:folder]
-          f = transform_to_hdf(folder)
+          f = transform_to_hdf(folder, next_allow_drag)
           h.copy "#{key}.folder", f
           #pp folder
         else
@@ -513,8 +539,11 @@ module YPoet::Controllers
         @poetify_hd.set_value 'admin', true
       end
       @poetify_hd.set_value "VERSION", "0.3.a"
+      @poetify_hd.set_value "drop_on_able", "drop_on_me"
+      @poetify_hd.set_value "unrestricted", true
       @poetify_hd.set_value "Poetify.description", red_or_dead('/var/www/localhost/htdocs/README.markdown')
       t = "&nbsp;" + Time.now.to_s
+      binding.pry
       @poetify_hd.set_value "notice", env['x-rack.flash'].notice + t if env['x-rack.flash'].has? :notice
       @poetify_hd.set_value "alert",  env['x-rack.flash'].alert + t if env['x-rack.flash'].has? :alert
       render :internal_index

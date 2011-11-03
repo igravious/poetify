@@ -44,13 +44,23 @@
 		return false;
 	} 
 
-	var publish = function(button) {
-		alert('This eventually will generate a publishing slip.\nThe slip will contain authorship rights and legalese and so on.');
-		stopEvent();
-		return false;
-	}
+	var do_publish = function(button) {
+        alert('This eventually will generate a publishing slip.'+String.fromCharCode(0x0A)+'The slip will contain authorship rights and legalese and so on.');
+        stopEvent();
+        return false;
+	};
 
+	var do_delete = function(button) {
+		if (confirm("This will place the poem in the trash.\nAre you super sure?")) {
+	  		$(document.ultimately).append('<input type="hidden" name="_method" value="DELETE">'); // already POST
+			document.ultimately.action="/epage/<?cs var:id ?>";
+			return true;
+		}
+        stopEvent();
+        return false;
+	};
 	</script>
+	
 	<form name='formly' class='classy' action="zpoet/publish" method="post"> <!-- zpoet is a dumb name, come up with a decent name that does not start with p -->
 	<fieldset> <legend class="classy">Multi:Verse</legend>
 	<br>
@@ -59,15 +69,24 @@
 	<br>
 	The name of your ePage is <span id='old_ePage_name'></span> or enter a new name here <input type="text" name="new_ePage_name" id="ePage_name" class="" />
 	<br>
+	<input id="" class="" name="ePoem_type" type="hidden" value="3"/> <!-- Multiverse -->
 	<input id="" class="" name="Save" type="submit" value="Save Me!" onclick="javascript:return click_trauma(this);"/>&nbsp;
 	<input id="" class="" name="Try" type="submit" value="Try Me!" onclick="javascript:return click_trauma(this);"/>&nbsp;
 	<input id="" class="" name="Publish" type="submit" value="Publish Me!" onclick="javascript:return publish(this);"/>
-	<a style="float:right" href='/landing'>back to the landing page</a>
-
-	<input id="" class="" name="ePoem_type" type="hidden" value="3"/> <!-- Multiverse -->
+	</form>
+	
+	<form name='ultimately' class='classy' style='display:inline' method="POST"> <!-- play is POST, save is PUT, publish is POST -->
+	<span style="float:right" >
+    	<input id="" class="" name="Publish" type="submit" value="Publish Me :)"
+			onclick="javascript:return do_publish(this);"/> |
+		<input id="" class="" name="Publish" type="submit" value="Delete Me :("
+			onclick="javascript:return do_delete(this);"/> |
+		<a href='/landing'>back to the landing page</a>		
+	</span>
 	</fieldset>
 	</form>
 </div>
+
 	<script>	
 	$(function() {
 	 // Handler for .ready() is called

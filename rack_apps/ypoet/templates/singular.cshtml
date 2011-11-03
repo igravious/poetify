@@ -1,4 +1,6 @@
 
+<!-- # UGLY (BUT NOT TOO UGLY!), IMPERFECT -- BUT FUNCTIONAL -->
+
 <div id="center_it" style="width:800px;"> <!-- adjust as necessary  there must be a non moronic way to do this-->
 	<script>
 	$(window).load(function () {
@@ -57,34 +59,11 @@
 			stopEvent(null);
 			return false;
 		}
-		var poem1 = document.formly.poem1.value;
-		where = poem1.indexOf('//')
-		if (where != -1) {
-			alert("Not going to try: found 2 or more / together in right-hand poem at position " + where);
-			stopEvent(null);
-			return false;
-		}
 		
 		poem0 = poem0.replace(/(\s*$)/gi,"");
-		poem1 = poem1.replace(/(\s*$)/gi,"");
 		
 		var poem_array0 = poem0.split(''+String.fromCharCode(0x0A));
-		var poem_array1 = poem1.split(''+String.fromCharCode(0x0A));
 		
-		if (poem_array0.length != poem_array1.length) {
-			alert("Not going to try: found differing number of lines " + poem_array0.length + " versus " + poem_array1.length);
-			stopEvent(null);
-			return false;
-		}
-		
-		/* each line must match :) */
-		for (var j = 0; j < poem_array0.length; j += 1) {
-			if (poem_array0[j].split('/').length != poem_array1[j].split('/').length) {
-				alert("Not going to try: found differing number of / on line " + j);
-				stopEvent(null);
-				return false;
-				}
-  		}
   		//document.formly.method="GET"
   		$(document.formly).append('<input type="hidden" name="_method" value="PUT">'); // already POST
 		document.formly.action="/play/<?cs var:id ?>";
@@ -115,7 +94,7 @@
 	
 	<!-- put does not work from forms -->
 	<form name='formly' class='classy' method="POST"> <!-- play is POST, save is PUT, publish is POST -->
-	<fieldset> <legend class="classy">Re:Verse</legend>
+	<fieldset> <legend class="classy">Singular</legend>
 	<br>
 	<span style="float:left">The title of your ePoem: <input type="text" name="ePoem_title" id="ePoem_title" class="" value="<?cs var:title ?>" /> (or leave blank if untitled)</span>
 	<span style="float:right">The version of your ePoem: <?cs var:version ?></span>
@@ -124,14 +103,10 @@
 	<table id="left_and_right" class="tabular" border="2" cellspacing="0" cellpadding="7"> 
 	<tr>
 	<th>::</th> 
-	<th>::</th> 
 	</tr>
 	<tr>
 	<td>
-		<textarea id='left' name='poem0' rows='24' cols='40'><?cs var:poem0 ?></textarea>
-	</td>
-	<td>
-		<textarea id='right' name='poem1' rows='24' cols='40'><?cs var:poem1 ?></textarea>
+		<textarea id='left' name='poem0' rows='24' cols='80'><?cs var:poem0 ?></textarea>
 	</td>
 	</tr>
 	</table>
@@ -143,7 +118,7 @@
 	<input id="" class="" name="Try"     type="submit" value="Try Me!"
 			onclick='javascript:return do_play(this);'/>&nbsp;
 			
-		<input id="ePoem_type" class="" name="ePoem_type" type="hidden" value="2"/> <!-- Reverse -->
+		<input id="ePoem_type" class="" name="ePoem_type" type="hidden" value="1"/> <!-- Reverse -->
 		<input id="old_ePage_name" class="" name="old_ePage_name" type="hidden" value=""/>
 		<input id="ePage_id" class="" name="ePage_id" type="hidden" value=""/>
 	</form>
@@ -167,7 +142,8 @@
 
 	<!-- 	should be "put" "redirect" "get" pattern, put to temp rows in a publish table which are overwritten
 		onclick='javascript:document.formly.method="put"; document.formly.action="http://web.durity.com:3301/publish"; '
-	-->	
+	-->
+	
 </div>
 
 <script>

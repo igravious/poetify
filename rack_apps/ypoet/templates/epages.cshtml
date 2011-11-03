@@ -2,7 +2,7 @@
 <script src='/javascripts/file-folder-utilities-0.1.js'> </script>
 <script type="text/javascript" src="/javascripts/3rd-party/plugins/jquery-simple-tree-menu-1.2.5.js"></script>
 <script type="text/javascript" src="/javascripts/3rd-party/plugins/jquery-cookie-0.6.5.js"></script>
-<link rel="stylesheet" href="/cascading_stylesheets/3rd-party/jq-simple-tree-menu-1.2.5.css"/>
+<link rel="stylesheet" href="/cascading_stylesheets/3rd-party/jquery-simple-tree-menu-1.2.5.css"/>
 <style>
 .hovering {
 	border-style: dotted;
@@ -12,39 +12,62 @@
 }
 </style>
 
-<form name="contain_me" id="contain_me" method="post">
-<span class="drop_on_me" ><i>All&nbsp;pages&nbsp;and&nbsp;folders</i>&nbsp;<img alt='pop up menu' id='the-image' onmouseover='this.style.cursor="hand"; this.src="/images/down-arrow-hover.png"' onmouseout='this.style.cursor="auto"; this.src="/images/down-arrow.png"' style='float:right; display:inline; margin-top: 8px' src='/images/down-arrow.png'></span><hr>
-<script>$('#the-image').toggle(superMenuIn, superMenuOut); var label_array = [];</script>
+<form name='contain_me' id='contain_me' method='post'>
+<span class='<?cs var:drop_on_able?>' >
+	<i>All&nbsp;pages&nbsp;and&nbsp;folders</i>&nbsp;
+    <?cs if:unrestricted ?>
+	<img 	alt='pop up menu'
+			id='the-image'
+			onmouseover='this.style.cursor="hand"; this.src="/images/down-arrow-hover.png"' 
+			onmouseout='this.style.cursor="auto"; this.src="/images/down-arrow.png"' 
+			style='float:right; display:inline; margin-top: 4px' 
+			src='/images/down-arrow.png'>
+	<script>
+		$('#the-image').toggle(superMenuIn, superMenuOut);
+		var label_array = [];
+	</script>
+	<?cs /if ?>
+</span>
 
+<hr>
 <ul class="tree">
 
 <?cs def:display_files(epages) ?>
   <?cs each:epage = epages ?>
-    <?cs if:epage.kind == -1 ?>
-      <li>
-      	<span id='the-folder-<?cs var:epage.id ?>' class='drag_me drop_on_me igor'><i><?cs var:epage.label?></i>&nbsp;<img alt='pop up menu' id='the-image-<?cs var:epage.id ?>' onmouseover='this.style.cursor="hand"; this.src="/images/down-arrow-hover.png"' onmouseout='this.style.cursor="auto"; this.src="/images/down-arrow.png"' style='float:right; display:none; margin-top: 8px' src='/images/down-arrow.png'></span>
-      	<script>
-      		$('#the-image-<?cs var:epage.id ?>').toggle(superMenuIn, superMenuOut);
-      		label_array['<?cs var:epage.id ?>'] = '<?cs var:epage.label?>';
-      	</script>
+    <?cs if:epage.kind == -1 ?> <!-- i am a folder -->
+    <li>
+      	<span id='the-folder-<?cs var:epage.id ?>' class='<?cs var:epage.draggable?> <?cs var:epage.drop_on_able?> igor'>
+      		<i><?cs var:epage.label?></i>&nbsp;
+      		<?cs if:epage.unrestricted ?>
+      		<img 	alt='pop up menu'
+      				id='the-image-<?cs var:epage.id ?>'
+      				onmouseover='this.style.cursor="hand"; this.src="/images/down-arrow-hover.png"'
+      				onmouseout='this.style.cursor="auto"; this.src="/images/down-arrow.png"'
+      				style='float:right; display:none; margin-top: 4px' 
+      				src='/images/down-arrow.png'>
+	      	<script>
+      			$('#the-image-<?cs var:epage.id ?>').toggle(superMenuIn, superMenuOut);
+      			label_array['<?cs var:epage.id ?>'] = '<?cs var:epage.label?>';
+    	  	</script>
+    	  	<?cs /if ?>
+      	</span>
       	<ul>
       	<?cs call:display_files(epage.folder) ?>
       	</ul>
-      </li>
-    <?cs else ?>
-      <li>
-      	<span id='the-epage-<?cs var:epage.id ?>' class='drag_me'><?cs var:epage.symbol ?><a style='display:inline;' href='epage/<?cs var:epage.id ?>'> <?cs var:epage.label ?></a></span>
-      	<script>
-      		
-      	</script>
-      </li>
+    </li>
+    <?cs else ?> <!-- i am an epage -->
+    <li>
+      	<span id='the-epage-<?cs var:epage.id ?>' class='<?cs var:epage.draggable?>'>
+      		<?cs var:epage.symbol ?><a style='display:inline;' href='epage/<?cs var:epage.id ?>'> <?cs var:epage.label ?></a>
+      	</span>
+    </li>
     <?cs /if ?>
   <?cs /each ?>
 <?cs /def ?>
 
 <?cs call:display_files(Epages) ?>
-
 </ul>
+
 </form>
 
 <!-- <?cs var:epage.controller ?>?id=<?cs var:epage.id ?>&name=<?cs var:epage.s_label ?> -->
@@ -77,7 +100,7 @@
   		var source_val = source_id.split('-')[2]
   		console.log(source_val);
   		if (target_val === undefined) {
-  			target_val = 0;
+  			target_val = "undefined";
   		}
   		document.contain_me.action = '/epage/move/'+source_val+'/'+target_val;
   		document.contain_me.submit();
