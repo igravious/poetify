@@ -151,7 +151,7 @@ class EPoem
       if target.nil? or !target.respond_to?(:to_i)
         raise "can't move that which is unmoveable"
       else
-        if 0 == target.to_i # or whatever it is
+        if "undefined" == target # or whatever it is
           target = "NULL"; # we know this is a folder
         else
           where_clause = "WHERE t.epage_id = #{target.to_i}"
@@ -195,7 +195,7 @@ class EPoem
         EPoem.db.commit
         
       else
-        raise "that would be a pad mismatch"
+        raise "these pages are not on the same pad"
       end
       
     rescue => boom
@@ -203,7 +203,57 @@ class EPoem
       $L.error { boom }
     end
   end
+  
+  def self.trash_epage( the_pad, the_id )
+    # create Trash which involves creating with the correct name in the language if it does not exist
+    # then moving the_id as the source to it.
     
+    epage = EPage.find(the_id) # first with where, not with find
+    binding.pry
+    raise "can't find this page on this pad" if epage.pad_id != the_pad.pad_id
+    raise "you're trying to remove a folder, and that's a no no" if epage.kind == folder_kind
+    
+    if (epage = EPage.where(:pad_id => the_pad.pad_id, :label => "Trash")).length == 1
+      trash_id = epage.first.epage_id
+    else
+      if epage.empty?
+        trash_id = create_folder( the_pad, 'Trash', "undefined")
+      else
+        raise "many trashes, how odd"
+      end
+      raise "something went wrong making the trash" if trash_id.nil?
+    end
+    
+    move_to_folder(the_id, trash_id)
+  end
+  
+  # delete from cookie would be verrry clever
+  def self.delete_epage( the_id )
+    begin
+      if the_id.nil? or !the_id.respond_to?(:to_i)
+        raise "can't delete that which is undeleteable"
+      end
+      
+        epage = EPage.find(the_id)
+        # assert that it is a folder
+        fail("oh no you don't") if epage.kind == folder_kind
+        EPoem.db.transaction
+        begin
+          *rows = EPoem.db.execute( "DELETE FROM TreePaths WHERE epage_id = #{the_id}" )
+          *rows = EPoem.db.execute( "DELETE FROM ePages WHERE epage_id = #{the_id}" )
+          EPoem.db.commit
+        rescue => bang
+          EPoem.db.transaction_active? and  EPoem.db.rollback
+          $L.error { bang }
+        end
+
+    rescue => boom
+      $L.error { boom }
+    end
+  end
+   
+  # the_pad !!
+  
   def self.delete_folder( the_id ) # should all these be wrapped in rescues and such?
     begin        
       if the_id.nil?
@@ -211,8 +261,6 @@ class EPoem
       else
         where_clause = "WHERE t.parent_id = #{the_id}"
       end
-  
-      tree = Hash.new
   
       columns, *rows = EPoem.db.execute2( "SELECT e.* FROM TreePaths t JOIN ePages e ON t.epage_id = e.epage_id #{where_clause}")
       # pp columns
@@ -235,13 +283,15 @@ class EPoem
           EPoem.db.commit
         rescue => bang
           EPoem.db.rollback
-          $L.error { boom }
+          $L.error { bang }
         end
       end
     rescue => boom
       $L.error { boom }
     end
   end
+  
+  # adjust cookie would be awesome
 	
 	def self.create_folder( the_pad, the_folder, parent_id )
     #puts "<div>the label is #{the_folder}</div>"
@@ -269,11 +319,12 @@ class EPoem
                       :parent_id => parent_id,
                       :next_id => max_id)
       EPoem.db.commit
+      max_id
       #puts "<div>inserted folder</div>"
     rescue => boom
       EPoem.db.rollback
-      # binding.pry
       $L.error { boom }
+      nil
     end
   end
   
@@ -285,6 +336,8 @@ class EPoem
     :'n:verse' => 3,
     :'woven:verse' => 4
   }
+  
+  # awesome i tells ya
   
   def self.create_epage( the_pad, the_page, parent_id, the_kind )
     #puts "<div>the label is #{the_page}</div>"
