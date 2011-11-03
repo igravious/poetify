@@ -29,12 +29,14 @@ var superMenuIn = function (ev) {
 	if (val === undefined) {
 		$(document.superDelete).hide();
 		$(document.superRename).hide();
+		$(document.superTrash).show();
 	} else {
 		document.superRename.EpageID.value = val;
 		document.superDelete.EpageID.value = val;
 		$('#delete_me').html(label_array[val]);
 		$(document.superRename).show();
 		$(document.superDelete).show();
+		$(document.superTrash).hide();
 	}
 
 	document.superFolder.EpageID.value = val;
