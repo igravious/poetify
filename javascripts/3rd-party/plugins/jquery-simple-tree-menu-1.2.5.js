@@ -49,8 +49,9 @@
 					methods.buildNode($(this));
 				});
 
+				$li.addClass("Node");
 				if ($how_many > 0) {
-					$li.addClass("Node").click(function (event) {
+					$li.click(function (event) {
 						var $t = $(this);
 						if ($t.hasClass("expanded")) {
 							$t.removeClass("expanded");
