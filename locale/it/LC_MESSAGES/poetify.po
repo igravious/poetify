@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: 0.3.a\n"
 "Report-Msgid-Bugs-To: github@jollyrotten.org\n"
 "POT-Creation-Date: 2011-10-30 15:32+0200\n"
-"PO-Revision-Date: 2011-10-30 17:23+0200\n"
+"PO-Revision-Date: 2011-11-03 02:11+0200\n"
 "Last-Translator: Anthony Durity <github@jollyrotten.org>\n"
 "Language-Team: The Italian Language Team\n"
 "Language: it\n"
@@ -17,9 +17,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-Language: Italian\n"
+"X-Poedit-SourceCharset: utf-8\n"
 
-#. TRANSLATORS:
+#.
 #.
 msgid "Welcome"
 msgstr "Benvenuti"
+
+#.
+#.
+msgid "Trash"
+msgstr "Cestino"
 
