@@ -1,0 +1,77 @@
+/* simpleTreeMenu */
+
+ul.simpleTreeMenu {
+	line-height: 1.75em;
+	padding: 0px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+ul.simpleTreeMenu, ul.simpleTreeMenu ul {
+	margin-left: 0px;
+	padding-left: 15px;
+}
+
+ul.simpleTreeMenu li.Node {
+	list-style-image: url("images/menu-arrow-right.png");
+	margin-left: 5px;
+	padding: 0px;
+}
+
+ul.simpleTreeMenu li.Node span {
+	cursor: pointer;
+	border: 1px;
+	border-style:solid;
+	/* evil trick */
+	border-color:transparent;
+	display: block;
+}
+
+ul.simpleTreeMenu li.Node span:hover {
+	background-color: #d8d8d0;
+	border: 1px dotted;
+	border-color: #FE57A1;
+}
+
+ul.simpleTreeMenu li.EmptyBlank {
+	list-style-image: url("images/menu-blank.png");
+	margin-left: 5px;
+	margin-top: 1px;
+}
+
+ul.simpleTreeMenu li.EmptyDot {
+	list-style-image: url("images/menu-dot.png");
+	margin-left: 5px;
+	margin-top: 1px;	
+}
+
+ul.simpleTreeMenu li.expanded {
+	list-style-image: url("images/menu-arrow-down.png");
+}
+
+ul.simpleTreeMenu li.Leaf {
+	list-style-image: url("images/menu-dot.png");
+	margin-left: 5px;
+	padding: 0px;
+}
+
+ul.simpleTreeMenu li.Leaf span {
+	cursor: pointer;
+	border: 1px;
+	border-style:solid;
+	/* evil trick */
+	border-color:transparent;
+	display: block;
+}
+
+ul.simpleTreeMenu li.Leaf span:hover {
+	background-color: #d8d8d0;
+	border: 1px dotted;
+	border-color: #FE57A1;
+}
+
+/* why is this needed */
+ul.simpleTreeMenu a, ul.simpleTreeMenu a:visited {
+	display: block;
+	text-decoration: none;
+}

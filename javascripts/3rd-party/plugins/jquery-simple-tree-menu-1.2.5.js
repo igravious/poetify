@@ -1,5 +1,10 @@
 /* SimpleTreeMenu */
 
+/* to stop http://jsfiddle.net/ complaining
+var jQuery;
+var window;
+*/
+
 (function ($) {
 	"use strict";
 
@@ -10,7 +15,7 @@
 
 		hasLocalStorage: function () {
 			// https://developer.mozilla.org/en/DOM/Storage
-			if (localStorage && localStorage.setItem && localStorage.getItem) {
+			if (window.localStorage && window.localStorage.setItem && window.localStorage.getItem) {
 				return true;
 			} else {
 				return false;
@@ -19,34 +24,40 @@
 
 		localStorageKey: function () {
 			return prv.localStorageKeyPrefix + $(this).attr("id");
-		},
+		}
 		
 		// for cookies: https://github.com/carhartl/jquery-cookie
 
 	}, methods = {
 
-		init: function () {
+		init: function (options) {
+			var blank;
+			if (!options) {
+				blank = false;
+			} else {
+				blank = options.blank;
+			}
 			return this.each(function () {
 				var $this = $(this);
 				if ($this.hasClass("simpleTreeMenu") === false) {
 					$this.hide();
 					$(this).addClass("simpleTreeMenu");
 					$this.children("li").each(function () {
-						methods.buildNode($(this));
+						methods.buildNode($(this),blank);
 					});
 					$(this).show();
 				}
 			});
 		},
 
-		buildNode: function ($li) {
+		buildNode: function ($li,blank) {
 			if ($li.children("ul").length > 0) {
 				$li.children("ul").hide();
 
 				var $how_many = 0;
 				$li.children("ul").children("li").each(function () {
 					$how_many += 1;
-					methods.buildNode($(this));
+					methods.buildNode($(this),blank);
 				});
 
 				$li.addClass("Node");
@@ -64,7 +75,7 @@
 					});
 				} else {
 					/* do not show arrow-head if no leaves */
-					$li.addClass("EmptyNode").click(function (event) {
+					$li.addClass(blank?"EmptyBlank":"EmptyDot").click(function (event) {
 						event.stopPropagation();
 					});
 				}
@@ -105,13 +116,13 @@
 
 		toLocalStorage: function (state) {
 			if (prv.hasLocalStorage() === true) {
-				localStorage.setItem(prv.localStorageKey.apply(this), state);
+				window.localStorage.setItem(prv.localStorageKey.apply(this), state);
 			}
 		},
 
 		fromLocalStorage: function () {
 			if (prv.hasLocalStorage() === true) {
-				return localStorage.getItem(prv.localStorageKey.apply(this));
+				return window.localStorage.getItem(prv.localStorageKey.apply(this));
 			}
 			return null;
 		},
@@ -121,7 +132,7 @@
 		},
 
 		fromCookieJar: function () {
-			return $.cookie(prv.localStorageKeyPrefix)
+			return $.cookie(prv.localStorageKeyPrefix);
 		},
 
 		serialize: function (storage) {
