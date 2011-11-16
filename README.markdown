@@ -70,3 +70,7 @@ classical, re:verse, trace:verse and so on.
  * Apache
  * Passenger Phusion
  * SQLite3
+ 
+```ruby
+  $stdout.puts "have a nice day!"
+```
