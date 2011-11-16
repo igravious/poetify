@@ -193,67 +193,10 @@ end
 require File.here "models"
 
 module YPoet::Controllers
-  class Index # RegexpError: regular expression too big:
-    def get
-      "try /landing or /another\n"
-    end
-  end
   
-  def self.dispatch(route, unpack)
-    e,m = unpack
-    
-    c,m,*p = D(route, m, e)
-    o = c.new(e, m)
-    if p.empty?
-      o.send(m.to_sym)
-    else
-      o.send(m.to_sym, *p) # must be splatted?
-    end
-  end
-  
-  # http://travisonrails.com/2008/08/17/working-with-the-flash-hash
-  # flash.now[] before a render
-  # flash[] before a redirect
-  
-  class Plus
-    def post
-      raise "gimme something to work with here buddy" if @input.plus_text.length == 0
-      @state[@input.plus_text] = "urk!"
-      pp @state
-      redirect YPoet::Controllers::Landing
-    end
-  end
-  
-  class Minus
-    def post
-      raise "gimme something to work with here buddy" if @input.minus_text.length == 0
-      @state.delete(@input.minus_text)
-      pp @state
-      redirect YPoet::Controllers::Landing
-    end
-  end
-  
-  class Borked
-    def post
-      raise "raised a generic error"
-    rescue => e
-      # should pass in e and have the flash print dev e.message or friendly user message
-      env['x-rack.flash'].alert = e.message
-      flash[:notice] = "This really is a pain in the neck" # nice, flash works ...
-      # should pass in e and have the logger decide whether backtrace is printed or not
-      $L.error { e.message }
-    ensure
-      redirect YPoet::Controllers::Landing
-    end
-  end
-  
-  class Inspect
-    def post
-      binding.pry
-      redirect YPoet::Controllers::Landing
-    end
-  end
-  
+  #
+  # /another
+  #
   class Xray
     def get
       # "fudge"
@@ -278,6 +221,76 @@ module YPoet::Controllers
       # render(:outer, {:locals => [@env, @method]}) { Neo::Hdf.new }
       # "...\n"
       # render :foo
+    end
+  end
+  
+  #
+  #
+  #
+  class Index # RegexpError: regular expression too big:
+    def get
+      "try /landing or /another\n"
+    end
+  end
+  
+  #
+  # this is what is called when ClearSilver `include`s another file
+  #
+  def self.dispatch(route, unpack)
+    e,m = unpack
+    
+    c,m,*p = D(route, m, e)
+    o = c.new(e, m)
+    if p.empty?
+      o.send(m.to_sym)
+    else
+      o.send(m.to_sym, *p) # must be splatted?
+    end
+  end
+  
+  #
+  # these are to test @state, please ignore them
+  #
+  class Plus
+    def post
+      raise "gimme something to work with here buddy" if @input.plus_text.length == 0
+      @state[@input.plus_text] = "urk!"
+      pp @state
+      redirect YPoet::Controllers::Landing
+    end
+  end
+  
+  class Minus
+    def post
+      raise "gimme something to work with here buddy" if @input.minus_text.length == 0
+      @state.delete(@input.minus_text)
+      pp @state
+      redirect YPoet::Controllers::Landing
+    end
+  end
+  
+  #
+  # flash.now[] before a render
+  # flash[] before a redirect
+  #
+  class Borked
+    def post
+      raise "raised a generic error"
+    rescue => e
+      # should pass in e and have the flash print dev e.message or friendly user message
+      env['x-rack.flash'].alert = e.message
+      flash[:notice] = "This really is a pain in the neck" # nice, flash works ...
+      # should pass in e and have the logger decide whether backtrace is printed or not
+      $L.error { e.message }
+    ensure
+      redirect YPoet::Controllers::Landing
+    end
+  end
+  
+  class Inspect
+    def post
+      binding.pry
+      redirect YPoet::Controllers::Landing
     end
   end
   
@@ -634,6 +647,9 @@ module YPoet::Controllers
     end
   end
   
+  #
+  # i have no idea what i'm testing here
+  #
   class Test
     def get
       render :some_hdf
