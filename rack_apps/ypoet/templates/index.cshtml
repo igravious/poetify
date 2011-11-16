@@ -1,6 +1,4 @@
-	
-	<!-- a href="http://web.durity.com:8080/cgi/epoet_landing_page.cgi" style="position: relative; font-size:400%; font-family:'times new roman',times,georgia,serif; padding:0.5em 0.2em; float:left; margin-left:0; margin-right:0; margin-top:0; margin-bottom; z-index:5">¶</a -->
-	
+		
 	<div id="center_it" style="width:800px;"> <!-- adjust as necessary -->
 	<script>
 	$(window).load(function () {
@@ -11,7 +9,28 @@
  		$("#center_it").offset({ top: the_top, left: the_left });
 	});
 	
+	var close_alert = function () {
+		$('#feedback_alert').fadeOut();
+		$('#feedback_alert').text('»» ');
+		$('#feedback_alert').show();
+		return false;
+	}
 	</script>
+
+		<form align="center">
+			<span style="float: left" id='feedback_alert'>»»&nbsp;<?cs var:alert ?></span>
+			<span style="float: right"><span>Choose a language</span>
+			<!-- http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes -->
+			<select>
+	  			<option value="it" <?cs if:lang=="it" ?>selected<?cs /if ?> >italiano</option>
+	  			<option value="en" <?cs if:lang=="en" ?>selected<?cs /if ?> >english</option>
+	  			<option value="ga" <?cs if:lang=="ga" ?>selected<?cs /if ?> >gaeilge</option>
+	  			<option value="fi" <?cs if:lang=="fi" ?>selected<?cs /if ?> >suomi</option>
+	  			<option value="ca" <?cs if:lang=="ca" ?>selected<?cs /if ?> >català</option>
+			</select>
+			</span>
+		</form>
+		<br />
   
   		<div class="cog" style="float:left">
 		<fieldset> <legend class="classy">Welcome</legend> <!-- does fieldset need a form? -->
@@ -69,9 +88,9 @@
 	<script>
 		$(function() {
 			// Handler for .ready() is called
-			$('#feedback_alert').css('color', 'green').fadeIn("slow");
-			$('#feedback_notice').css('color', 'orange').fadeIn("slow");
+			$('#feedback_alert').css({color: 'black'}).animate({color: 'red'},'slow');
+			$('#feedback_notice').css({color: 'black'}).animate({color: 'orange'},'slow');
 		});
-</script>
+	</script>
 	
     <?cs include:"super_duper.html" ?>
