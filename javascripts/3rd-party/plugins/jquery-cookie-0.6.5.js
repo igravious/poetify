@@ -7,6 +7,11 @@
  * http://www.gnu.org/licenses/gpl.html
  *
  */
+
+/* to stop http://jsfiddle.net/ complaining
+var jQuery;
+*/
+
 jQuery.cookie = function (key, value, options) {
 
     // key and at least value given, set cookie...

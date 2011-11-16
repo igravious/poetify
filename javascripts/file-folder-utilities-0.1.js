@@ -17,7 +17,8 @@ var keep_track = 0;
 
 var superMenuOut = function () {
 	'use strict';
-	$("#file-folder").hide();
+	//$("#file-folder").hide();
+	$("#file-folder").dialog('close')
 };
 
 var superMenuIn = function (ev) {
@@ -29,7 +30,12 @@ var superMenuIn = function (ev) {
 	if (val === undefined) {
 		$(document.superDelete).hide();
 		$(document.superRename).hide();
-		$(document.superTrash).show();
+		console.log('has_a_trash');console.log(has_a_trash);
+		if (has_a_trash === "yes") {
+			$(document.superTrash).show();
+		} else {
+			$(document.superTrash).hide();
+		}
 	} else {
 		document.superRename.EpageID.value = val;
 		document.superDelete.EpageID.value = val;
@@ -47,21 +53,23 @@ var superMenuIn = function (ev) {
 
 	if (!once) {
 		once = false;
-		ff = $("#file-folder").detach();
-		ff.appendTo('body');
+		//ff = $("#file-folder").detach();
+		//ff.appendTo('body');
+		$('#file-folder').dialog({ autoOpen: false })
 	}
 
-	ff_width = $("#file-folder").width();
+	//ff_width = $("#file-folder").width();
 	/* alert ("target " + target + " t pos.left " + pos.left + " t pos.top " + pos.top + " t width " + width + " ff width " + ff_width); */
 
 	// show the menu to the left and below the placeholder
-	$("#file-folder").css({ "left": ((pos.left - ff_width - 8) + "px"), "top": ((pos.top + height) + "px") });
+	//$("#file-folder").css({ "left": ((pos.left - ff_width - 8) + "px"), "top": ((pos.top + height) + "px") });
 
 	// for debugging purposes, will cease to be
 	// $("#custom-stuff").empty();
 	// $("#custom-stuff").append(curr_id);
 
-	$("#file-folder").show();
+	//$("#file-folder").show();
+	$("#file-folder").dialog('open')
 	document.superPage.NewObject.focus();
 
 	// 
