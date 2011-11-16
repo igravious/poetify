@@ -136,8 +136,8 @@ class EPoem
         where_clause = "WHERE t.epage_id = #{source.to_i}"
       end
       s_columns, *s_rows = EPoem.db.execute2( "SELECT t.*,e.* FROM TreePaths t JOIN ePages e ON t.epage_id = e.epage_id #{where_clause}")
-      pp s_columns
-      pp s_rows
+      #pp s_columns
+      #pp s_rows
       # s_columns is unused
       # s_col_epage_id = s_columns.find_index("epage_id")
       # s_col_kind = s_columns.find_index("kind")
@@ -156,8 +156,8 @@ class EPoem
         else
           where_clause = "WHERE t.epage_id = #{target.to_i}"
           t_columns, *t_rows = EPoem.db.execute2( "SELECT t.*,e.* FROM TreePaths t JOIN ePages e ON t.epage_id = e.epage_id #{where_clause}")
-          pp t_columns
-          pp t_rows
+          #pp t_columns
+          #pp t_rows
           # t_columns is unused
           # t_col_epage_id = t_columns.find_index("epage_id")
           # t_col_kind = t_columns.find_index("kind")
@@ -204,12 +204,29 @@ class EPoem
     end
   end
   
+  def self.empty_trash( the_pad )
+    # only empty that which can be emptied
+    if (epage = EPage.where(:pad_id => the_pad.pad_id, :label => "Trash")).length == 1
+      trash_id = epage.first.epage_id
+    else
+      if epage.empty?
+        $L.info "attempt to empty a non-existant trash on pad "+the_pad.pad_id
+        return
+      else
+        raise "many trashes on pad "+the_pad.pad_id+", how odd"
+      end
+    end
+    TreePath.where(:parent_id => epage).each do |delete_me|
+      delete_epage( the_pad, delete_me.epage_id )
+    end
+    delete_folder( trash_id )
+  end
+  
   def self.trash_epage( the_pad, the_id )
     # create Trash which involves creating with the correct name in the language if it does not exist
     # then moving the_id as the source to it.
     
     epage = EPage.find(the_id) # first with where, not with find
-    binding.pry
     raise "can't find this page on this pad" if epage.pad_id != the_pad.pad_id
     raise "you're trying to remove a folder, and that's a no no" if epage.kind == folder_kind
     
@@ -219,7 +236,7 @@ class EPoem
       if epage.empty?
         trash_id = create_folder( the_pad, 'Trash', "undefined")
       else
-        raise "many trashes, how odd"
+        raise "many trashes on pad "+the_pad.pad_id+", how odd"
       end
       raise "something went wrong making the trash" if trash_id.nil?
     end
@@ -228,13 +245,16 @@ class EPoem
   end
   
   # delete from cookie would be verrry clever
-  def self.delete_epage( the_id )
+  def self.delete_epage( the_pad, the_id )
     begin
       if the_id.nil? or !the_id.respond_to?(:to_i)
         raise "can't delete that which is undeleteable"
       end
       
         epage = EPage.find(the_id)
+        if epage.pad_id != the_pad.pad_id
+          raise "trying to delete a poem/epage ("+epage.pad_id+")from a different pad ("+the_pad.pad_id+")"
+        end
         # assert that it is a folder
         fail("oh no you don't") if epage.kind == folder_kind
         EPoem.db.transaction
@@ -248,6 +268,7 @@ class EPoem
         end
 
     rescue => boom
+      # sort out error handling from redux man (and in general, user notifications)
       $L.error { boom }
     end
   end
@@ -269,7 +290,6 @@ class EPoem
       # col_epage_id = columns.find_index("epage_id")
       # col_kind = columns.find_index("kind")
       # col_label = columns.find_index("label")
-      pp rows
       if rows.length > 0
         raise "Folder is not empty!"
       else
