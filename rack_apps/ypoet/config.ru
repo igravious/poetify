@@ -1,12 +1,14 @@
 
 #$DEBUG=true
 
-%w{rubygems pry camping camping/session tarpaulin rack-flash}.each{|g| require g}
+%w{rubygems pry camping camping/session tarpaulin rack-flash gettext}.each{|g| require g}
 
 #now we have the logger, set the program name
 $L.progname = "SanSan"
 $L.debug "Current working directory is: "+Dir.getwd
 Neo::Cs.bindtextdomain "poetify", Dir.getwd+"/locale"
+GetText::bindtextdomain('poetify', :path => Dir.getwd+'/locale')
+GetText::textdomain('poetify')
 
 Camping.goes :YPoet
 
@@ -59,9 +61,6 @@ module YPoet::Controllers
   end
 end 
 
-module YPoet::Helpers
-end
-
 module YPoet
   def check_for_cookies!
     # oh the magic incantation
@@ -86,10 +85,8 @@ module YPoet
   end
   
   def force_option_id
-    $stderr.puts "+++ 1"
     redirect R(YPoet::Controllers::DoYouCookie)+"?referer=#{@env['PATH_INFO']}"
     throw :halt, self
-    $stderr.puts "+++ 2"
   end
   
   # how about cookieless?
@@ -124,11 +121,6 @@ module YPoet
   
   # need :all_bar Foo
   hook :before_service => :all do
-    #require 'gettext'
-    #need true gettext C ext for Ruby
-    #GetText::set_locale('it_IT.UTF-8')
-    #GetText::bindtextdomain('poetify', :path => Dir.getwd+'/locale')
-    #GetText::textdomain('poetify')
     #$L.debug self.class.to_s.light_red
     #$L.debug @env['PATH_INFO'].to_s.light_red
     #$L.debug @env['HTTP_COOKIE'].red
@@ -248,7 +240,6 @@ module YPoet::Controllers
       # should pass in e and have the flash print dev e.message or friendly user message
       env['x-rack.flash'].alert = e.message
       flash[:notice] = "This really is a pain in the neck" # nice, flash works ...
-      binding.pry
       # should pass in e and have the logger decide whether backtrace is printed or not
       $L.error { e.message }
     ensure
@@ -290,6 +281,13 @@ module YPoet::Controllers
     end
   end
   
+  class EmptyTrash
+    def put
+      EPoem.empty_trash(@p)
+      redirect YPoet::Controllers::Landing
+    end
+  end
+  
   class EpageN
     def get(id) # show and edit a poem
       epage = EPage.find(id)
@@ -325,6 +323,10 @@ module YPoet::Controllers
         poem.set_value "poem1", poem1
       end
       render(v) { poem }
+    rescue
+      $L.error $!.message
+      flash[:alert] = $!.message
+      redirect YPoet::Controllers::Landing 
     end
     
     def put(id) # save a poem
@@ -455,7 +457,7 @@ module YPoet::Controllers
     end
   end
   
-  class EpageMoveNN
+  class EpageMoveXX
     def post(source,target)
       EPoem.move_to_folder( source, target )
       redirect Landing
@@ -463,36 +465,54 @@ module YPoet::Controllers
   end
   
   class Landing
-
+    
+    # example of making a key last, would be better to reorder the Ruby hash
     def transform_to_hdf(tree, allow_drag = true)
       h = Neo::Hdf.new
+      delay = nil
+      trash_key = nil
       tree.each do |p|
         key = p[0]
         val = p[1]
-        epage_id = key
         kind = val[:kind]
         s_label = val[:s_label]
-        h.set_value "#{key}.id", key
-        h.set_value "#{key}.kind", kind
-        h.set_value "#{key}.s_label", s_label
-        h.set_value "#{key}.draggable", "drag_me" if allow_drag
-        h.set_value "#{key}.label", s_label.gsub(/ /,"&nbsp;")
-        #pp key
-        #pp val
+        #binding.pry
         if kind == EPoem.folder_kind
-          allow_drag = true
           if s_label == "Trash"
-            next_allow_drag = false
-            h.set_value "#{key}.draggable", ""
+            @has_a_trash = true
+            #binding.pry
+            trash_key = key
+            #$stderr.puts "+trash_key "+trash_key.to_s
+            delay = Proc.new do |k|
+              # key is what key was when bound?
+              #$stderr.puts "+key "+key.to_s
+              GetText::set_locale(@language) # is 'xx' ... obviously the more specific the better, but fuck it
+              h.set_value "#{k}.id", k
+              h.set_value "#{k}.kind", kind
+              trash_label = GetText::_("Trash")
+              h.set_value "#{k}.s_label", trash_label
+              h.set_value "#{k}.label", trash_label.gsub(/ /,"&nbsp;")
+              next_allow_drag = false
+              folder = val[:folder]
+              f = transform_to_hdf(folder, next_allow_drag)
+              h.copy "#{k}.folder", f
+              #pp folder
+            end
           else
+            #$stderr.puts "-key "+key.to_s
+            h.set_value "#{key}.id", key
+            h.set_value "#{key}.kind", kind
+            h.set_value "#{key}.s_label", s_label
+            h.set_value "#{key}.label", s_label.gsub(/ /,"&nbsp;")
+            h.set_value "#{key}.draggable", "drag_me"
             h.set_value "#{key}.drop_on_able", "drop_on_me"
             h.set_value "#{key}.unrestricted", true
             next_allow_drag = true
+            folder = val[:folder]
+            f = transform_to_hdf(folder, next_allow_drag)
+            h.copy "#{key}.folder", f
+            #pp folder
           end
-          folder = val[:folder]
-          f = transform_to_hdf(folder, next_allow_drag)
-          h.copy "#{key}.folder", f
-          #pp folder
         else
           case kind
             when 1
@@ -508,10 +528,15 @@ module YPoet::Controllers
               #h.set_value "#{key}.controller", "epage/traceverse"
               h.set_value "#{key}.symbol", "¶"
           end
+          h.set_value "#{key}.id", key
+          h.set_value "#{key}.kind", kind
+          h.set_value "#{key}.s_label", s_label
+          h.set_value "#{key}.draggable", "drag_me" if allow_drag
+          h.set_value "#{key}.unrestricted", true if allow_drag
+          h.set_value "#{key}.label", s_label.gsub(/ /,"&nbsp;")
         end
       end
-      #pp h
-      #print h.dump
+      delay.call(trash_key) if delay
       h
     end
     
@@ -532,18 +557,26 @@ module YPoet::Controllers
     end
     
     def get
+      @has_a_trash = false
       @title = "Poetify Loves You Very Much"
       @poetify_hd = Neo::Hdf.new
       @poetify_hd.copy "Epages", fill_hdf(@p)
+      #binding.pry
+      if @has_a_trash
+        @poetify_hd.set_value 'has_a_trash', "yes" 
+      else
+        @poetify_hd.set_value 'has_a_trash', "no"
+      end
       if admin
         @poetify_hd.set_value 'admin', true
       end
       @poetify_hd.set_value "VERSION", "0.3.a"
       @poetify_hd.set_value "drop_on_able", "drop_on_me"
       @poetify_hd.set_value "unrestricted", true
-      @poetify_hd.set_value "Poetify.description", red_or_dead('/var/www/localhost/htdocs/README.markdown')
-      t = "&nbsp;" + Time.now.to_s
-      binding.pry
+      @poetify_hd.set_value "Poetify.description", IO.read('/var/www/localhost/htdocs/README.html') # red_or_dead('/var/www/localhost/htdocs/README.markdown')
+      @poetify_hd.set_value "lang", @language
+      #t = "&nbsp;" + Time.now.to_s
+      t = '&nbsp;<a href="" onclick="javascript:return close_alert();">x</a>'
       @poetify_hd.set_value "notice", env['x-rack.flash'].notice + t if env['x-rack.flash'].has? :notice
       @poetify_hd.set_value "alert",  env['x-rack.flash'].alert + t if env['x-rack.flash'].has? :alert
       render :internal_index
@@ -663,6 +696,7 @@ module YPoet::Controllers
     end
     
     def post(*unsupported)
+      binding.pry
       raise "unsupported verb in dyno-boy!!"
     end
     
@@ -692,25 +726,27 @@ module YPoet::Views
         
         meta "name" => "viewport", "content" => "width=device-width,initial-scale=1"
 
-        link "rel" => "stylesheet", "href" => "/cascading_stylesheets/poetify.css"
-
+        link "rel" => "Stylesheet", "href" => "/cascading_stylesheets/poetify.css", "type" => "text/css"
+        
+        link "type" => "text/css", "href" => "/cascading_stylesheets/3rd-party/custom-theme-cupertino/jquery-ui-cupertino-1.8.16.custom.css", "rel" => "Stylesheet"
+        # <link type="text/css" href="css/themename/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
+        
+        # javascript_link_tag "//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"
+        # script "src" => "//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js" do
+        # end
+        # script do
+        #   text "window.jQuery || document.write('<script src=\"/javascripts/3rd-party/jquery-1.7.min.js\"><\\/script>')"
+        # end
+        # javascript_link_tag "//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js""
+        script "src" => "/javascripts/3rd-party/jquery-1.7.min.js" do
+        end
+        script "src" => "/javascripts/3rd-party/jquery-ui-cupertino-1.8.16.custom.min.js" do
+        end
         script "src" => "/javascripts/3rd-party/modernizr-2.0.6.min.js" do
-          
-        #javascript_link_tag "//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"
-        script "src" => "//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" do
-        end
-        script do
-          text "window.jQuery || document.write('<script src=\"/javascripts/3rd-party/jquery-1.6.4.min.js\"><\\/script>')"
-        end
-        # "//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js""
-        script "src" => "/javascripts/3rd-party/jquery-ui-1.8.16.custom.min.js" do
-        end
-
         end
       end
       body do
         div.container! do
-          #binding.pry
           header do
           end
           div.main!(:role => "main") do
