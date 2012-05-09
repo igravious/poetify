@@ -1,3 +1,10 @@
+
+#
+# try to keep y_ruby/w.rb in sync
+#
+# $ irb
+# >> load 'y_ruby/w.rb'
+#
 module YPoet::Models
   class DUMMY < Base # force it to autoload
     ActiveRecord::Base.logger = $L
@@ -288,13 +295,13 @@ SQL
     end
   end
   
-    class PerBrowserPoemPad < V 0.4
+  class PerBrowserPoemPad < V 0.4
     # 
     def self.up
       change_table PoemPad.table_name do |t|
         t.string :unique_id, :limit => 64 # should be NOT NUL :(
       end
-      PoemPad.find(3).update_attribute(:unique_id, "92dae58c93ce1cd9cf5728f8b02b955a392bcc64b89ad8d8a4200bbbb9e04c61");
+      PoemPad.find(3).update_attribute(:unique_id, '92dae58c93ce1cd9cf5728f8b02b955a392bcc64b89ad8d8a4200bbbb9e04c61');
     end
   
     def self.down
@@ -303,4 +310,22 @@ SQL
       end
     end
   end
+  
+  class TabbedVerseAhoy < V 0.5 # how to associate this data with my dev cookie?
+    def self.up
+      # 
+      EPoem.db.execute_batch <<SQL
+INSERT INTO 'KindConstants' ('kind', 'user_visible', 'klass_name') VALUES(5,'Tabbed:Verse','TabbedPoem');
+SQL
+    end
+    
+    #
+    # http://ar.rubyonrails.org/classes/ActiveRecord/Base.html#M000341
+    #
+    def self.down
+      # KindConstant. remove
+      KindConstant.delete(5)
+    end
+  end
+  
 end

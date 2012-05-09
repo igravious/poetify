@@ -1,7 +1,9 @@
 source 'http://rubygems.org'
 gem "tarpaulin", "~> 0.3.0" # provides tilt, clearsilver, lazy, ... 
 gem 'camping', '= 2.1.467' # http://camping.rubyforge.org/ https://github.com/camping/camping
-gem 'mime-types', '= 1.16' # http://mime-types.rubyforge.org/
+gem 'mime-types', '~> 1.16' # http://mime-types.rubyforge.org/
+gem 'pry', '~> 0.9.8.2' #
+gem 'gettext' '~> 2.1.0' #
 
 # gem 'vestal_versions' # https://github.com/laserlemon/vestal_versions
 gem 'activesupport', '= 3.0.3'

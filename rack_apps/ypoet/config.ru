@@ -313,11 +313,6 @@ module YPoet::Controllers
       poem.set_value "title", epage[:title]
       poem.set_value "version", epage.version
       @title = 'your lovely little poem'
-      poem0 = ""
-      if !epage[:body].nil? and !epage[:body][:poem0].nil? and !epage[:body][:poem0].empty?
-        poem0 = epage[:body][:poem0]
-      end
-      poem.set_value "poem0", poem0
       case epage[:kind]
         when 1
           v = :singular
@@ -327,6 +322,30 @@ module YPoet::Controllers
           v = :multiverse
         when 4
           v = :traceverse
+        when 5
+          v = :tabbedverse
+      end
+      if epage[:kind] != 5
+        poem0 = ""
+        if !epage[:body].nil? and !epage[:body][:poem0].nil? and !epage[:body][:poem0].empty?
+          poem0 = epage[:body][:poem0]
+        end
+        poem.set_value "poem0", poem0
+      else
+        poems = ''
+        if !epage[:body].nil?
+          poem_type = epage[:kind]
+          @e_poem_module = EPoem.type(poem_type) # use it :)
+          # LOL
+          # epage.body[epage.body.keys.map {|x| x.to_s}.sort[0].to_sym]
+          epage.body.keys.map {|x| x.to_s}.sort.each_with_index do |x,j|
+          # epage[:body].each_with_index do |x,j|
+            #x[0] =~ /poem(\d+)/
+            verse = epage[:body][x.to_sym]
+            poems <<= "\n\tpoem["+j.to_s+'] = "'+(@e_poem_module::javascriptify verse)+'";'
+          end
+        end
+        poem.set_value "ypoem", "\n\t// oh yeah baby\n\t//"+poems
       end
       if epage[:kind] == 2 or epage[:kind] == 4
         poem1 = ""
@@ -338,7 +357,7 @@ module YPoet::Controllers
       render(v) { poem }
     rescue
       $L.error $!.message
-      flash[:alert] = $!.message
+      flash[:alert] = $!.message # TODO escape this for dev, make it nice for mere mortals
       redirect YPoet::Controllers::Landing 
     end
     
@@ -382,6 +401,17 @@ module YPoet::Controllers
     def delete(id)
       EPoem.trash_epage(@p, id)
       redirect YPoet::Controllers::Landing
+    end
+  end
+  
+    class PlayN
+    # it's a PUT because it is idempotent for the mo' cuz of the messy URI business
+    def put(id)
+      @input.ePoem_id = id
+      poem_type = @input.ePoem_type
+      @e_poem_module = EPoem.type(poem_type) # use it :)
+      PlayN.send(:include, @e_poem_module)
+      render @e_poem_module::render # rhtml is so simple to use with tilt
     end
   end
 
@@ -530,16 +560,24 @@ module YPoet::Controllers
           case kind
             when 1
               #h.set_value "#{key}.controller", "epage/singular"
+              # dagger
               h.set_value "#{key}.symbol", "†"
             when 2
               #h.set_value "#{key}.controller", "epage/reverse"
+              # double dagger
               h.set_value "#{key}.symbol", "‡"
             when 3
               #h.set_value "#{key}.controller", "epage/multiverse"
+              # section sign
               h.set_value "#{key}.symbol", "§"
             when 4
               #h.set_value "#{key}.controller", "epage/traceverse"
+              # pilcrow
               h.set_value "#{key}.symbol", "¶"
+            when 4
+              #h.set_value "#{key}.controller", "epage/traceverse"
+              # interrobang
+              h.set_value "#{key}.symbol", "‽"
           end
           h.set_value "#{key}.id", key
           h.set_value "#{key}.kind", kind
@@ -633,17 +671,6 @@ module YPoet::Controllers
       pp params[EPoem::THE_ID].inspect
       EPoem.delete_folder( params[EPoem::THE_ID] )
       redirect Landing
-    end
-  end
-  
-  class PlayN
-    # it's a PUT because it is idempotent for the mo' cuz of the messy URI business
-    def put(id)
-      @input.ePoem_id = id
-      poem_type = @input.ePoem_type
-      @e_poem_module = EPoem.type(poem_type) # use it :)
-      PlayN.send(:include, @e_poem_module)
-      render @e_poem_module::render
     end
   end
   

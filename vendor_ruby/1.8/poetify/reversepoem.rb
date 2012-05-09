@@ -21,8 +21,9 @@ module ReversePoem
 		:play_with_reverse
 	end
 	
-	# functions that are included in the controllers
-	
+	#
+	# used by #verse and #reverse
+	#
 	def either verse
 		v = verse # trailing whitespace is stripped
 		v.gsub!(/\r\n/, "\n") # turn CR+LF into newline
@@ -42,10 +43,16 @@ module ReversePoem
 		w
 	end
 	
+	#
+	# for the rhtml, (it is so much easier than cs really)
+	#
 	def verse
 		either @input.poem0 # @input is from where the module is mixed in to :)
 	end
 	
+	#
+	# for the rhtml
+	#
 	def reverse
 		either @input.poem1 # yeah, ditto
 	end

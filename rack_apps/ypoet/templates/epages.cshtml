@@ -14,9 +14,7 @@
 
 <form name='contain_me' id='contain_me' method='post'>
 <span class='<?cs var:drop_on_able?>' >
-	<i>All&nbsp;pages&nbsp;and&nbsp;folders</i>&nbsp;
-    <?cs if:unrestricted ?>
-	<img 	alt='pop up menu'
+	<i>All&nbsp;pages&nbsp;and&nbsp;folders</i>&nbsp;<?cs if:unrestricted ?><img alt='pop up menu'
 			id='the-image'
 			onmouseover='this.style.cursor="hand"; this.src="/images/down-arrow-hover.png"' 
 			onmouseout='this.style.cursor="auto"; this.src="/images/down-arrow.png"' 
@@ -38,9 +36,7 @@
     <?cs if:epage.kind == -1 ?> <!-- i am a folder -->
     <li>
       	<span id='the-folder-<?cs var:epage.id ?>' class='<?cs var:epage.draggable?> <?cs var:epage.drop_on_able?> igor'>
-      		<i><?cs var:epage.label?></i>&nbsp;
-      		<?cs if:epage.unrestricted ?>
-      		<img 	alt='pop up menu'
+      		<i><?cs var:epage.label?></i>&nbsp;<?cs if:epage.unrestricted ?><img alt='pop up menu'
       				id='the-image-<?cs var:epage.id ?>'
       				onmouseover='this.style.cursor="hand"; this.src="/images/down-arrow-hover.png"'
       				onmouseout='this.style.cursor="auto"; this.src="/images/down-arrow.png"'

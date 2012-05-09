@@ -249,6 +249,71 @@ textarea {
 }
 
 
+/* ========
+   the tabs
+   ======== */
+
+
+#tabul {
+    padding: 0;
+    margin: 0;
+    padding: 5px 0;
+}
+#tabul li {
+    display: inline;
+    -webkit-border-radius: .3em .3em 0 0;
+    -moz-border-radius: .3em .3em 0 0;
+    border-radius: .3em .3em 0 0;
+    cursor: pointer;
+}
+.ntabs {
+    background: #BDC7D5;
+    margin-right: 1px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #333;
+    border: 1px solid #BDC7D5;
+    padding: 5px 3px 5px 8px;
+}
+.add {
+    padding: 5px 8px;
+}
+#addtab {
+    font-size: 16px;
+    text-decoration: none;
+    position: relative;
+    top: 2px;
+    color: #333;
+}
+#addtab:hover {
+    color: #999;
+}
+.ctab {
+    background: #E7EDF6;
+    position: relative;
+    top: 2px;
+    border-bottom-width: 0;
+}
+.close {
+    text-decoration: none;
+    color: #999;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 0 4px;
+    -webkit-border-radius: .2em;
+    -moz-border-radius: .2em;
+    border-radius: .2em;
+}
+.close:hover {
+    background: #999;
+    color: #333;
+}
+#tabcontent {
+    border: 1px solid #BDC7D5;
+    background: #E7EDF6;
+    padding: 8px;
+    color: #666;
+}
 
 
 /* =============================================================================

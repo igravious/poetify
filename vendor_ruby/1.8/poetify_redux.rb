@@ -354,7 +354,8 @@ class EPoem
     :'1:verse' => 1,
     :'2:verse' => 2,
     :'n:verse' => 3,
-    :'woven:verse' => 4
+    :'woven:verse' => 4,
+    :'tabbed:verse' => 5
   }
   
   # awesome i tells ya
