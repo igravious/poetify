@@ -1,0 +1,237 @@
+
+<div id="center_it" style="width:800px;"> <!-- adjust as necessary  there must be a non moronic way to do this-->
+	<script>
+	
+	var poem = [];
+	// <?cs var:ypoem ?>
+	
+	$(window).load(function () {
+		// Handler for .ready() called.
+		the_top = $("#center_it").offset().top;
+ 		the_left = (($(window).width() - 800)/2);
+ 		// alert(the_top + " --- " + the_left);
+ 		$("#center_it").offset({ top: the_top, left: the_left });
+	});
+
+	function stopEvent(e) {
+    	if (!e) e = window.event;
+    	if (e.stopPropagation) {
+        	e.stopPropagation();
+    	} else {
+        	e.cancelBubble = true;
+    	}
+	}
+
+	function cancelEvent(e) {
+    	if (!e) e = window.event;
+    	if (e.preventDefault) {
+        	e.preventDefault();
+    	} else {
+        	e.returnValue = false;
+    	}
+	}
+
+	var do_publish = function(button) {
+        alert('This eventually will generate a publishing slip.'+String.fromCharCode(0x0A)+'The slip will contain authorship rights and legalese and so on.');
+        stopEvent();
+        return false;
+	};
+
+	var do_delete = function(button) {
+		if (confirm("This will place the poem in the trash.\nAre you super sure?")) {
+	  		$(document.ultimately).append('<input type="hidden" name="_method" value="DELETE">'); // already POST
+			document.ultimately.action="/epage/<?cs var:id ?>";
+			return true;
+		}
+        stopEvent();
+        return false;
+	};
+
+	var do_play = function(obj) {		
+		/*
+			run the gauntlet
+			http://www.qodo.co.uk/blog/javascript-trim-leading-and-trailing-spaces	
+		*/
+		
+		try {
+			var poems = $('.the_poems');
+			
+			/* TODO - redo the validation
+			 * 
+			 
+			var poem0 = document.formly.poem0.value;
+			var where = poem0.indexOf('//')
+			if (where != -1) {
+				alert("Not going to try: Found 2 or more / together in left-hand poem at position " + where);
+				stopEvent(null);
+				return false;
+			}
+			var poem1 = document.formly.poem1.value;
+			where = poem1.indexOf('//')
+			if (where != -1) {
+				alert("Not going to try: found 2 or more / together in right-hand poem at position " + where);
+				stopEvent(null);
+				return false;
+			}
+			
+			poem0 = poem0.replace(/(\s*$)/gi,"");
+			poem1 = poem1.replace(/(\s*$)/gi,"");
+			
+			var poem_array0 = poem0.split(''+String.fromCharCode(0x0A));
+			var poem_array1 = poem1.split(''+String.fromCharCode(0x0A));
+			
+			if (poem_array0.length != poem_array1.length) {
+				alert("Not going to try: found differing number of lines " + poem_array0.length + " versus " + poem_array1.length);
+				stopEvent(null);
+				return false;
+			}
+			
+			// each line must match :)
+			for (var j = 0; j < poem_array0.length; j += 1) {
+				if (poem_array0[j].split('/').length != poem_array1[j].split('/').length) {
+					alert("Not going to try: found differing number of / on line " + j);
+					stopEvent(null);
+					return false;
+					}
+	  		}
+	  		 *
+	  		 */
+	  		$(document.formly).append('<input type="hidden" name="_method" value="PUT">'); // already POST
+			document.formly.action="/play/<?cs var:id ?>";
+			return true;
+		} catch(err) {
+	  		txt="There was an error on this page. ";
+	  		txt+="Error description: " + err.description + String.fromCharCode(0x0A);
+	  		txt+="Click OK to continue.";
+	  		alert(txt);
+	  		stopEvent(null);
+	  		return false;
+	  	}
+	};
+
+	var do_save = function() {
+		$(document.formly).append('<input type="hidden" name="_method" value="PUT">'); // already POST
+		document.formly.action="/epage/<?cs var:id ?>";
+		return true;
+	};
+
+	var do_history = function() {
+		//document.formly.method="GET"
+		//document.formly.action="/epage/history/<?cs var:id ?>";
+		//$('input').detach();
+		return true;
+	};
+	
+	// http://superdit.com/2011/05/08/create-dynamic-tabs-with-jquery/
+	
+	$(function() {
+	    var total_tabs = 0;
+	    // initialize all tabs from poems
+	    while (total_tabs < poem.length) {
+	    	total_tabs++;
+	    	addtab(total_tabs);
+	    	$('#poem'+total_tabs).val(poem[total_tabs-1]);
+	    }
+	    //$("#tabcontent p").hide();
+	    if (poem.length>0) {
+	    	$('#t1').trigger('click');
+	    }
+	
+	    $("#addtab, #litab").click(function() {
+	        total_tabs++;
+	        $("#tabcontent p").hide();
+	        addtab(total_tabs);
+	        return false;
+	    });
+	
+	    function addtab(count) {
+	        var closetab = '<a href="" id="close'+count+'" class="close">&times;</a>';
+	        $("#tabul").append('<li id="t'+count+'" class="ntabs">Tab '+count+'&nbsp;&nbsp;'+closetab+'</li>');
+	        $("#tabcontent").append('<p id="c'+count+'"><textarea id="poem'+count+'" name="poem'+count+'" class="the_poems" rows="30" cols="80"></textarea></p>');
+	
+	        $("#tabul li").removeClass("ctab");
+	        $("#t"+count).addClass("ctab");
+	
+	        $("#t"+count).bind("click", function() {
+	            $("#tabul li").removeClass("ctab");
+	            $("#t"+count).addClass("ctab");
+	            $("#tabcontent p").hide();
+	            $("#c"+count).fadeIn('slow');
+	        });
+	
+	        $("#close"+count).bind("click", function() {
+	            // activate the previous tab
+	            $("#tabul li").removeClass("ctab");
+	            $("#tabcontent p").hide();
+	            $(this).parent().prev().addClass("ctab");
+	            $("#c"+count).prev().fadeIn('slow');
+	
+	            $(this).parent().remove();
+	            $("#c"+count).remove();
+	            return false;
+	        });
+	    }
+	});
+	</script>
+
+	<!-- put does not work from forms -->
+	<form name='formly' class='classy' method="POST"> <!-- play is POST, save is PUT, publish is POST -->
+	<fieldset> <legend class="classy">Tabbed-Verse</legend>
+	<br>
+	<span style="float:left">The title of your ePoem: <input type="text" name="ePoem_title" id="ePoem_title" class="" value="<?cs var:title ?>" /> (or leave blank if untitled)</span>
+	<span style="float:right">The version of your ePoem: <?cs var:version ?></span>
+	<br>
+	<br>
+	<ul id="tabul">
+    	<li id="litab" class="ntabs add"><a href="" id="addtab">+</a></li>
+	</ul>
+	<div id="tabcontent"></div>
+	
+	<br>
+	The name of your ePage is <b><span id='old_ePage_name_display'></span></b> or rename it to something new here <input type="text" name="new_ePage_name" id="ePage_name" class="" />
+	<br><br>
+	<input id="" class="" name="Save"    type="submit" value="Save Me!"
+			onclick='javascript:return do_save();'/>&nbsp;
+	<input id="" class="" name="Try"     type="submit" value="Try Me!"
+			onclick='javascript:return do_play(this);'/>&nbsp;
+			
+		<input id="ePoem_type" class="" name="ePoem_type" type="hidden" value="5"/> <!-- Reverse -->
+		<input id="old_ePage_name" class="" name="old_ePage_name" type="hidden" value=""/>
+		<input id="ePage_id" class="" name="ePage_id" type="hidden" value=""/>
+	</form>
+	
+	<form name='historicly' class='classy' style='display:inline' action="/epage/history/<?cs var:id ?>" method="GET">
+	<input id="" class="" name="History"     type="submit" value="View History"
+			onclick='javascript:return do_history(this);'/>
+	<input id="version" class="" name="version" type="hidden" value="<?cs var:version ?>"/>
+	</form>
+	
+	<form name='ultimately' class='classy' style='display:inline' method="POST"> <!-- play is POST, save is PUT, publish is POST -->
+	<span style="float:right" >
+    	<input id="" class="" name="Publish" type="submit" value="Publish Me :)"
+			onclick="javascript:return do_publish(this);"/> |
+		<input id="" class="" name="Publish" type="submit" value="Delete Me :("
+			onclick="javascript:return do_delete(this);"/> |
+		<a href='/landing'>back to the landing page</a>		
+	</span>
+	</fieldset>
+	</form>
+
+	<!-- 	should be "put" "redirect" "get" pattern, put to temp rows in a publish table which are overwritten
+		onclick='javascript:document.formly.method="put"; document.formly.action="http://web.durity.com:3301/publish"; '
+	-->	
+</div>
+
+<script>
+$(function() {
+ // Handler for .ready() is called
+ name = '<?cs var:label ?>'
+ id = '<?cs var:id ?>'
+ // show it
+ $('#old_ePage_name_display').empty().append(name).css('color', 'green');
+ // save it
+ $('#old_ePage_name').val(name);
+ // and save the id
+ $('#ePage_id').val(id);
+});
+</script>

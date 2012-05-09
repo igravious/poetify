@@ -1,0 +1,383 @@
+
+<script type="text/javascript">
+  
+// -- user-defined background --
+
+// <%= poem_functions %>
+
+/*jslint bitwise: true, browser: true, eqeqeq: true, immed: true, newcap: true, nomen: true, plusplus: true, regexp: true, undef: true, maxerr: 50, indent: 2, onevar: false */
+
+// clicking (flips or locks the text? (switch?))
+// master lock
+
+var JOLLY = {}; // my namespace
+
+var figure = {};
+// title
+figure.poems = [];
+figure.titles = [];
+figure.poems_array = [];
+// poems
+// <%= poems %>
+
+function initialize()
+{
+  for (var m=0; m<figure.max; m++) {
+  	figure.poems_array[m] = figure.poems[m].split('\n');
+  }  
+}
+
+initialize();
+
+function get_bounding(str)
+{
+  hidden_span = document.createElement('span');
+  hidden_span.style.visibility="hidden";
+  // add an invisible div just before the last element of the document
+  var my_page = document.getElementById("page");
+  my_page.appendChild(hidden_span);
+  // place the text in it
+  hidden_span.innerHTML = str;
+  hidden_span.setAttribute('id',"nuke_me");
+  // now read the elements width and height
+  var w = hidden_span.offsetWidth;
+  var h = hidden_span.offsetTop; // ?? this is not the height
+  var nuke_me = document.getElementById("nuke_me");
+  my_page.removeChild(nuke_me);
+  
+  // return it
+  return {
+    width: w,
+    height: h
+  };
+}
+
+// should be sent in larger, smaller
+function pad_and_position(str, larger_width, smaller_width)
+{
+  left_pad = right_pad = (larger_width-smaller_width)/2;
+  if ((larger_width-smaller_width)%2 == 1) right_pad += 1; 
+    
+  return '<span style="padding-right:'+right_pad+'px; padding-left:'+left_pad+'px; width:'+larger_width+'px;">'+str+'</span>';
+  // text-align:center;
+}
+
+// element
+// escaped segment (to prevent poetic literals messing up javascript)
+function effectify(el, segment)
+{
+  $(el).fadeOut('slow', function () {
+    var newHTML = unescape(segment);
+    el.innerHTML = newHTML;
+    $(el).fadeIn('slow');
+  });
+}
+
+entered = 0;
+journey = null;
+bad_trigger = null;
+
+// jQuery this !! use binding and all that goodness
+
+function textual_up_identical(unique, k, one)
+{
+  s = ' \
+    <span id="divil_outer" \
+    > \
+    <!-- identical --><span style="cursor:default" id="divil_inner'+unique+':'+k+'" \
+    >'
+    + one 
+    + '</span></span>';
+  return s;
+}
+
+// effectify fades out the first and in the second
+
+function textual_up_same_length(unique, k, phrases)
+{
+  for (var n = 1; n < phrases.length; n += 1) {
+  	journey[unique][k].pieces[n] = phrases[n];
+  }
+  
+  s = ' \
+    <span id="divil_outer" \
+    > \
+    <!-- same length --><span style="cursor:default" id="divil_inner'+unique+':'+k+'" \
+          onmouseover=" \
+            var index = journey[ '+unique+' ][ '+k+' ]; \
+            if (index.evented == 0) { \
+              if (index.flip == figure.max-1) { \
+                effectify(this,\''+escape(phrases[0])+'\'); \
+                index.flip = 0; \
+              } else { \
+              	index.flip +=1; \
+                effectify(this,escape(index.pieces[index.flip])); \
+              } \
+              e = window.event; \
+              /* console.log(e); */ \
+              /* console.log(\'over: unique: \'+ '+unique+' +\' k: \'+ '+k+' ); */ \
+              index.evented += 1; \
+              e.cancelBubble = true; \
+              if (e.stopPropagation) e.stopPropagation(); \
+              return false; \
+            } \
+          " \
+          onmouseout=" \
+            var index = journey[ '+unique+' ][ '+k+' ]; \
+            index.evented -= 1; \
+            e = window.event; \
+            /* console.log(e.target.id); */ \
+            /* console.log(\'out: unique: \'+ '+unique+' +\' k: \'+ '+k+' ); */ \
+            e.cancelBubble = true; \
+            if (e.stopPropagation) e.stopPropagation(); \
+            return false; \
+          " \
+    >'
+    + phrases[0] 
+    + '</span></span>';
+  return s;
+}
+
+function biggest_width(bounds) {
+  var bw = 0;
+  for (var n = 1; n < bounds.length; n += 1) {
+  	if (bounds[n].width > bw) bw = bounds[n].width;
+  }
+  return bw;
+}
+
+function all_equal(phrases) {
+  for (var n = 1; n < phrases.length; n += 1) {
+  	if (phrases[n] != phrases[0]) return false;
+  }
+  return true;
+}
+
+// each line has a unique number
+function multiple_up(unique, lines)
+{
+  // they all have the same id, prolly not what you want
+
+  var sequences = new Array(lines.length);
+  for (var n = 0; n < lines.length; n += 1) {
+  	sequences[n] = lines[n].split('/');
+  }
+  var s = '';
+  
+  journey[unique] = new Array(sequences[0].length);
+  for (var k = 0; k < sequences[0].length; k += 1) {
+    journey[unique][k] = {};
+    journey[unique][k].evented = 0; // this? really?
+    journey[unique][k].flip = 0;
+    journey[unique][k].pieces = [];
+    var phrases = new Array(lines.length);
+    for (var n = 0; n < lines.length; n += 1) {
+    	// one = phrases[0] , two = phrases[1] , ...
+    	phrases[n] = sequences[n][k];
+    }
+    if (all_equal(phrases)) {
+      s += textual_up_identical(unique, k, phrases[0]);
+    } else {
+      var bounds = new Array(lines.length);
+      for (var n = 0; n < lines.length; n += 1) {
+    	bounds[n] = get_bounding(phrases[n]);
+      }
+      console.log(bounds);
+      bw = biggest_width(bounds);
+      for (var n = 0; n < lines.length; n += 1) {
+      	if (n != bw) {
+      	  phrases[n] = pad_and_position(phrases[n], bw, bounds[n].width);
+      	}
+      }
+      console.log(phrases);
+      // i surely can use this cuz now they are the same length, no?
+      // unique and k are used for indexing
+      s += textual_up_same_length(unique, k, phrases);
+    }
+  }
+  s += '<br>\n';
+  
+  return s;
+}
+
+function toss()
+{
+  return !! Math.floor(Math.random() * 2);
+}
+
+function poemify(title, poem, the_el)
+{
+  var elem = document.getElementById(the_el);
+
+  //elem.innerHTML += '<u>'+double_up(one, two)+'</u>';
+  journey = new Array(poem[0].length + 1);
+  console.log(title);
+  // first param is a unique number
+  elem.innerHTML = '<i>' + multiple_up(0, title) + '</i>';
+  elem.innerHTML += '<br>\n';  
+  for (var k = 0; k < poem[0].length; k += 1) {
+  	var line = [];
+  	for (var j = 0; j < poem.length; j += 1) {
+  	  line[j] = poem[j][k];
+  	}
+  	console.log(line);
+    //var one = poem.one[k];
+    //var two = poem.two[k];
+    //console.log(one);
+    //console.log(two);
+    // first param is a unique number
+    elem.innerHTML += multiple_up(k+1, line); // line by line
+  }
+}
+
+//
+// show the first poem
+//
+function this_title()
+{
+  return figure.titles;
+}
+
+function this_poem()
+{
+  return figure.poems_array;
+}
+
+function click_this()
+{
+  var title = this_title();
+  var poem = this_poem();
+  var the_el = "dynamic_element";
+
+  poemify(title, poem, the_el);
+}
+
+//
+// show the second poem
+//
+function that_title()
+{
+  return {
+    two: this_figure.title,
+    one: that_figure.title
+  };
+}
+
+function that_poem()
+{
+  return {
+    two: this_figure.poem_array,
+    one: that_figure.poem_array
+  };
+}
+
+function click_that()
+{
+  var title = that_title();
+  var poem = that_poem();
+  var the_el = "dynamic_element";
+
+  poemify(title, poem, the_el);
+}
+
+//
+// just randomize poetic elements, not line ordering
+//
+function the_other_poem()
+{
+  var len = this_figure.poem_array.length;
+  var alpha_poem = [];
+  var omega_poem = [];
+  var done_array = [];
+  for (var i = 0; i < len; i += 1) {
+    done_array[i] = false;
+  }
+  var done = 0;
+  while (done < len) {
+    if (toss()) {
+      alpha_poem[done] = this_figure.poem_array[done];
+      omega_poem[done] = that_figure.poem_array[done];
+    } else {
+      alpha_poem[done] = that_figure.poem_array[done];
+      omega_poem[done] = this_figure.poem_array[done];        
+    }
+    done += 1;
+  }
+  return {
+    one: alpha_poem,
+    two: omega_poem
+  };
+}
+
+function click_the_other()
+{
+  var title = (toss() ? this_title() : that_title());
+  var poem = the_other_poem();
+  var the_el = "dynamic_element";
+
+  poemify(title, poem, the_el);
+}
+
+  </script>
+</head>
+<body>
+  <div id="center_it" style="width:800px;"> <!-- adjust as necessary -->
+	<script>
+	$(function() {
+		// Handler for .ready() called.
+		the_top = $("#center_it").offset().top;
+ 		the_left = (($(window).width() - 800)/2);
+ 		// alert(the_top + " --- " + the_left);
+ 		$("#center_it").offset({ top: the_top, left: the_left });
+	});
+	</script>
+
+	<form name='formly' class='classy'>
+	<fieldset> <legend class="classy">Re:Verse</legend>
+	  <div id="page">
+		
+		<div id="this_side">
+		  <div id_"style_chooser">
+			<a href="#" onclick="click_this()">&Alpha;</a>
+		  </div>
+		</div>
+		<br> <!-- crappy separator for now -->
+		
+		<div id="that_side">
+		  <div id_"style_chooser">
+			<a href="#" onclick="click_that()">&Omega;</a>
+		  </div>
+		</div>
+		<br> <!-- crappy separator for now -->
+		
+		<div id="the_other_side">
+		  <div id_"style_chooser">
+			<a href="#" onclick="click_the_other()">~</a>
+		  </div>
+		</div>
+		<br>
+		
+		<div id="double_figure">
+		  <script type="text/javascript">
+		  
+			var divil = '';
+			var the_el = "dynamic_element";
+			divil += '<div id="' + the_el + '"></div>\n';
+			document.write(divil);
+			
+			click_this();
+		  
+		  </script>
+		</div>
+		<span style="float:right" >
+			<!-- ><a href='/epage/<%= id %>' >back to the poem</a>&nbsp; -->
+			<a href='javascript:history.back()' >back to the poem</a>&nbsp;
+			<!-- need a dirty flag if the poem has been modified -->
+			<a href='/landing' onclick='javascript:return confirm("You certain about that?")'; >back to the landing page</a>
+		</span>	
+	  </div>
+	</fieldset>
+	</form>
+  </div>
+</body>
+</html>
